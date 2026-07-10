@@ -2,7 +2,7 @@
   "task_id": "task-comprehensive-budgeting",
   "task_description": "Build a comprehensive, fully-featured personal financial budgeting app with expense management, budget tracking, income tracking, savings goals, bill reminders, debt management, net worth tracking, financial reports, calendar, personalized insights, and settings. All data persists in localStorage with personalization based on onboarding answers.",
   "status": "in_progress",
-  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005", "FEAT-006"],
   "blocked_reason": null,
   "verification": {
     "build": "pass",

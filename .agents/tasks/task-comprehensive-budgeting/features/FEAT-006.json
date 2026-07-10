@@ -2,7 +2,7 @@
   "id": "FEAT-006",
   "type": "fix",
   "description": "Address v2 review issues: (1) Add quota feedback error banners to CRUD pages when storage.create/update returns success=false, (2) Fix import function in settings to distinguish parse vs write errors and use safeSetItem, (3) Optimize calendar page by pre-computing events with useMemo into a Map keyed by day.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add error state and error banner to all CRUD pages (transactions, budgets, income, savings, bills, debts, net-worth) that shows when a create/update operation returns { success: false }.",
     "Fix the import function in settings/page.tsx to use the storage layer's safeSetItem, distinguish parse errors from write errors, show appropriate error messages, and do pre-validation of approximate total size before writing.",
@@ -19,5 +19,5 @@
   ],
   "verification": ["bun run build", "bun run lint"],
   "blocked_reason": null,
-  "findings": null
+  "findings": "Build uses bun (not npm). The NotImplementedError warnings from worker_threads are cosmetic and do not affect the build. Pre-existing lint warning in AuthContext.tsx (unused _password parameter) is unrelated. All 7 CRUD pages now check storage.create/update return values and display a red alert banner on failure. Settings import now properly separates parse errors from write errors, uses safeSetItemRaw, and reports partial failures. Calendar uses a single useMemo pass to pre-compute events into a Map, eliminating O(cells * entities) per-render computation."
 }
