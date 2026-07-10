@@ -30,5 +30,5 @@
     "Run 'bun run lint' and confirm no lint errors"
   ],
   "blocked_reason": null,
-  "findings": "Build and lint pass. The worker_threads warnings during build are non-blocking Bun compatibility notices. Used Link from next/link for internal navigation per eslint-config-next. All components compile as static pages."
+  "findings": "Build and lint pass. Post-review fixes applied: removed dark-mode media query (not in PRD scope), added aria-labelledby to Hero section, added noscript fallback to EmailSignup, added 15% random failure simulation for error UI testability. The worker_threads warnings during build are non-blocking Bun compatibility notices."
 }
