@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Implement the BudgetWise landing page with Hero section, Features section, Email capture form, Header, and Footer. Replace the default Next.js starter page with a fully responsive, accessible, and semantically structured landing page.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Update app/layout.tsx: Change metadata title to 'BudgetWise - Personal Finance Assistant' and description to match the product value proposition. Keep Geist fonts and existing body classes.",
     "Update app/globals.css: Extend the @theme inline block with BudgetWise brand colors (a green/teal primary palette for finance, neutral grays for text). Keep the existing Tailwind import and font variables.",
@@ -30,5 +30,5 @@
     "Run 'bun run lint' and confirm no lint errors"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build and lint pass. The worker_threads warnings during build are non-blocking Bun compatibility notices. Used Link from next/link for internal navigation per eslint-config-next. All components compile as static pages."
 }
