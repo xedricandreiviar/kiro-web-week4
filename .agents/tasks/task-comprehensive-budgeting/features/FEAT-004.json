@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Build Bills & Recurring page (bill reminders, recurring bills tracker), Debts page (track debts with payoff strategies), and Net Worth page (assets vs liabilities tracking).",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create app/dashboard/bills/page.tsx - Bills & recurring payments page with: (1) Upcoming bills section showing bills due in the next 30 days sorted by due date, with overdue bills highlighted in red, (2) 'Add Bill' form with: name, amount, due date (day of month), frequency (monthly/quarterly/yearly), category, auto-pay toggle, (3) Bill cards showing: name, amount, next due date, days until due (or 'overdue' badge), paid/unpaid toggle, (4) Mark as paid action, (5) Monthly bills summary (total due this month, total paid, total remaining), (6) Edit/delete bill actions, (7) Calendar-style mini view showing which days have bills due.",
     "Create app/dashboard/debts/page.tsx - Debt management page with: (1) Total debt overview (sum of all remaining debt amounts), (2) 'Add Debt' form with: name, total original amount, remaining amount, interest rate %, minimum payment, due date, (3) Debt cards showing: name, remaining vs total (progress bar showing how much paid off), interest rate, minimum payment, estimated payoff date based on minimum payments, (4) Payoff strategy comparison - show two strategies: 'Avalanche' (highest interest first) and 'Snowball' (smallest balance first) with estimated total interest and payoff timeline for each, (5) 'Make Payment' action to reduce debt balance, (6) Edit/delete debt actions, (7) Debt-free date projection.",
@@ -21,5 +21,5 @@
   ],
   "verification": ["npm run build", "npm run lint"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Build uses bun (not npm). The NotImplementedError warnings from worker_threads are cosmetic and do not affect the build. Pre-existing lint warning in AuthContext.tsx (unused _password parameter) is unrelated to this feature. All three pages follow the existing pattern: use client directive, useState lazy initializer for loading data, expandable form panels, responsive grid layouts, semantic HTML sections. Net worth page pulls debts from debtStorage and shows them as read-only liabilities. Payoff strategy calculations include simple interest compounding simulation with $100 extra payment per month."
 }
