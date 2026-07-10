@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Add auth context, login page, login button in header, onboarding questionnaire, personalized dashboard with full financial assistant features, and app tour overlay. This is a single comprehensive feature covering the entire user flow: landing page -> login -> onboarding questions -> dashboard with tour.",
+  "status": "in_progress",
+  "steps": [
+    "Create app/context/AuthContext.tsx - a 'use client' React context provider that manages auth state (isLoggedIn, user profile with onboarding answers) using localStorage. Export AuthProvider, useAuth hook. Store user data as JSON in localStorage key 'budgetwise_user'. Include login(email, password), logout(), updateProfile(data) methods.",
+    "Create app/login/page.tsx - a login page with email and password fields. Use 'use client'. On submit, simulate authentication (any email/password combo works), store user in context/localStorage, and redirect to /onboarding using next/navigation useRouter. Style with existing primary/neutral Tailwind tokens. Include a link back to landing page.",
+    "Update app/components/Header.tsx - add a 'Log In' button/link next to the existing 'Get Early Access' button. Use Link from next/link pointing to /login. Style consistently with existing button patterns.",
+    "Create app/onboarding/page.tsx - a multi-step questionnaire (3-4 steps) that personalizes the financial assistant. Questions should include: (1) What is your monthly income range? (2) What are your top spending categories? (3) What is your primary financial goal? (saving, debt payoff, investing, budgeting) (4) How much do you want to save monthly? Use 'use client', show progress indicator, store answers in AuthContext. After final step, redirect to /dashboard.",
+    "Create app/dashboard/page.tsx - the main financial assistant dashboard. Use 'use client'. Display personalized greeting using user's profile. Include dashboard sections: (a) Budget Overview card showing monthly budget vs spending with progress bar, (b) Expense Tracker section with a list of mock recent transactions and ability to add new ones (stored in localStorage), (c) Savings Goal card showing progress toward savings goal from onboarding, (d) Spending by Category breakdown with visual bars, (e) Quick Actions area (add expense, set budget, view reports). Use mock data seeded from onboarding answers. All data in localStorage.",
+    "Create app/dashboard/components/AppTour.tsx - a 'use client' overlay tour component that highlights key dashboard areas one by one. Show on first visit (track in localStorage 'budgetwise_tour_complete'). Steps: (1) Welcome message, (2) Point to Budget Overview, (3) Point to Expense Tracker, (4) Point to Savings Goal, (5) Point to Quick Actions, (6) Completion message. Include Next/Previous/Skip buttons. Use a semi-transparent backdrop with highlighted area.",
+    "Update app/layout.tsx - wrap {children} with the AuthProvider context so auth state is available throughout the app.",
+    "Create app/dashboard/layout.tsx - a dashboard-specific layout with a sidebar navigation (Dashboard, Expenses, Budget, Goals, Settings links) and header with user greeting and logout button. Protect the route by checking auth state and redirecting to /login if not authenticated."
+  ],
+  "acceptance_criteria": [
+    "Landing page at / still renders correctly with the new 'Log In' button in the header",
+    "Clicking 'Log In' navigates to /login page with email/password form",
+    "Submitting login form stores user in localStorage and redirects to /onboarding",
+    "Onboarding shows multi-step questionnaire with progress indicator",
+    "Completing onboarding stores personalization data and redirects to /dashboard",
+    "Dashboard displays personalized content based on onboarding answers",
+    "Dashboard shows budget overview, expense tracker, savings goals, spending categories, and quick actions",
+    "App tour overlay appears on first dashboard visit with step-by-step guidance",
+    "App tour can be navigated (next/previous) or skipped",
+    "Logout button clears auth state and returns to landing page",
+    "All pages use semantic HTML and responsive Tailwind CSS",
+    "bun run build passes successfully",
+    "bun run lint passes with no errors"
+  ],
+  "verification": [
+    "Run 'bun run build' and confirm it compiles without errors and generates routes for /, /login, /onboarding, /dashboard",
+    "Run 'bun run lint' and confirm no ESLint errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
