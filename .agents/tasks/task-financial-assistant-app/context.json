@@ -1,0 +1,27 @@
+{
+  "project_type": "Next.js 16 App Router frontend MVP (no backend)",
+  "language": "TypeScript",
+  "build_system": "Next.js 16 with bun as package manager. node_modules already installed. AGENTS.md warns about breaking changes in Next.js 16 - read docs in node_modules/next/dist/docs/ before writing code.",
+  "test_framework": "No test framework configured. Verification via build and lint only.",
+  "build_command": "bun run build",
+  "test_command": "bun run lint",
+  "verification_instructions": "1. Run 'bun run build' - should compile and generate static pages without errors. 2. Run 'bun run lint' - should pass with no ESLint errors.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "node_modules already installed. Use 'bun' for package management (npm/npx not available). Branch 'feat/financial-assistant-app' already created from main.",
+  "environment_constraints": "npm/npx not available - use bun. No real backend exists - authentication and data must be simulated client-side using localStorage and React state/context. Next.js 16 has breaking changes - params is a Promise, use 'use client' directive for interactive components.",
+  "contribution_requirements": "Responsive Tailwind CSS utility classes required. Semantic HTML for all layout sections. Follow existing patterns: green/teal primary palette (primary-50 to primary-900), neutral grays. Server components by default, 'use client' only for interactive pieces.",
+  "key_patterns": "Components in app/components/. Server components by default (no directive). Client components marked with 'use client'. Tailwind CSS 4 with @theme inline custom tokens in globals.css. Link from next/link. Existing landing page at app/page.tsx composing Header, Hero, Features, EmailSignup, Footer. Geist font family.",
+  "relevant_files": [
+    "app/page.tsx",
+    "app/layout.tsx",
+    "app/globals.css",
+    "app/components/Header.tsx",
+    "app/components/Hero.tsx",
+    "app/components/Features.tsx",
+    "app/components/EmailSignup.tsx",
+    "app/components/Footer.tsx",
+    "node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md",
+    "node_modules/next/dist/docs/01-app/01-getting-started/05-server-and-client-components.md"
+  ],
+  "directory_structure": "app/ - main application code with page.tsx (landing), layout.tsx (root), globals.css (theme), components/ (shared UI). public/ - static assets. New routes should be added as folders inside app/ (e.g., app/login/page.tsx, app/onboarding/page.tsx, app/dashboard/page.tsx)."
+}
