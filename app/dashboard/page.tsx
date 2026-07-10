@@ -1,134 +1,140 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 import AppTour from "./components/AppTour";
+import {
+  transactionStorage,
+  budgetStorage,
+  savingsGoalStorage,
+  billStorage,
+  Transaction,
+  Budget,
+  SavingsGoal,
+  Bill,
+} from "../lib/storage";
+import {
+  formatCurrency,
+  formatDateShort,
+  calculatePercentage,
+  getMonthDateRange,
+  getCategoryColor,
+} from "../lib/utils";
+import { seedDataIfEmpty } from "../lib/seed";
 
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: string;
-}
-
-const EXPENSES_KEY = "budgetwise_expenses";
-
-function getMonthlyBudget(incomeRange: string): number {
-  const map: Record<string, number> = {
-    "Under $2,000": 1500,
-    "$2,000 - $4,000": 3000,
-    "$4,000 - $6,000": 4500,
-    "$6,000 - $8,000": 6000,
-    "$8,000 - $10,000": 8000,
-    "Over $10,000": 10000,
+function initializeDashboardData(
+  categories: string[],
+  incomeRange: string,
+  monthlySavingsTarget: string
+): {
+  transactions: Transaction[];
+  budgets: Budget[];
+  savingsGoals: SavingsGoal[];
+  bills: Bill[];
+} {
+  if (typeof window === "undefined") {
+    return { transactions: [], budgets: [], savingsGoals: [], bills: [] };
+  }
+  // Seed data if first load with empty storage
+  seedDataIfEmpty(categories, incomeRange, monthlySavingsTarget);
+  return {
+    transactions: transactionStorage.getAll(),
+    budgets: budgetStorage.getAll(),
+    savingsGoals: savingsGoalStorage.getAll(),
+    bills: billStorage.getAll(),
   };
-  return map[incomeRange] || 3000;
-}
-
-function getSavingsTarget(target: string): number {
-  const map: Record<string, number> = {
-    "$100 - $300": 200,
-    "$300 - $500": 400,
-    "$500 - $1,000": 750,
-    "$1,000 - $2,000": 1500,
-    "Over $2,000": 2500,
-  };
-  return map[target] || 400;
-}
-
-function generateMockExpenses(categories: string[]): Expense[] {
-  const mockData: { description: string; category: string; amount: number }[] = [
-    { description: "Grocery shopping", category: "Food & Dining", amount: 85.5 },
-    { description: "Electric bill", category: "Utilities", amount: 120.0 },
-    { description: "Gas station", category: "Transportation", amount: 45.0 },
-    { description: "Streaming subscription", category: "Entertainment", amount: 15.99 },
-    { description: "Rent payment", category: "Housing", amount: 1200.0 },
-    { description: "Restaurant dinner", category: "Food & Dining", amount: 52.3 },
-    { description: "Online course", category: "Education", amount: 29.99 },
-    { description: "New shoes", category: "Shopping", amount: 89.0 },
-    { description: "Doctor visit copay", category: "Healthcare", amount: 30.0 },
-    { description: "Bus pass", category: "Transportation", amount: 65.0 },
-  ];
-
-  const relevant = mockData.filter(
-    (item) => categories.length === 0 || categories.includes(item.category)
-  );
-
-  const selected = relevant.length > 0 ? relevant.slice(0, 6) : mockData.slice(0, 6);
-
-  return selected.map((item, i) => ({
-    id: `mock-${i}`,
-    description: item.description,
-    amount: item.amount,
-    category: item.category,
-    date: new Date(Date.now() - i * 86400000 * 2).toISOString().split("T")[0],
-  }));
 }
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [newDescription, setNewDescription] = useState("");
-  const [newAmount, setNewAmount] = useState("");
-  const [newCategory, setNewCategory] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
 
   const onboarding = user?.onboarding;
-  const monthlyBudget = getMonthlyBudget(onboarding?.incomeRange || "");
-  const savingsTarget = getSavingsTarget(onboarding?.monthlySavingsTarget || "");
   const categories = onboarding?.spendingCategories || [];
+  const incomeRange = onboarding?.incomeRange || "";
+  const monthlySavingsTarget = onboarding?.monthlySavingsTarget || "";
 
-  useEffect(() => {
-    const stored = localStorage.getItem(EXPENSES_KEY);
-    if (stored) {
-      try {
-        setExpenses(JSON.parse(stored));
-      } catch {
-        const mock = generateMockExpenses(categories);
-        setExpenses(mock);
-        localStorage.setItem(EXPENSES_KEY, JSON.stringify(mock));
-      }
-    } else {
-      const mock = generateMockExpenses(categories);
-      setExpenses(mock);
-      localStorage.setItem(EXPENSES_KEY, JSON.stringify(mock));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [data] = useState(() =>
+    initializeDashboardData(categories, incomeRange, monthlySavingsTarget)
+  );
 
-  const totalSpending = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const budgetPercentage = Math.min((totalSpending / monthlyBudget) * 100, 100);
-  const currentSavings = Math.max(monthlyBudget - totalSpending, 0);
-  const savingsPercentage = Math.min((currentSavings / savingsTarget) * 100, 100);
+  const transactions = data.transactions;
+  const budgets = data.budgets;
+  const savingsGoals = data.savingsGoals;
+  const bills = data.bills;
 
-  const spendingByCategory = expenses.reduce<Record<string, number>>((acc, e) => {
-    acc[e.category] = (acc[e.category] || 0) + e.amount;
-    return acc;
-  }, {});
+  // Current month date range
+  const { start: monthStart, end: monthEnd } = getMonthDateRange(0);
 
-  const maxCategorySpending = Math.max(...Object.values(spendingByCategory), 1);
+  // Monthly transactions
+  const monthlyTransactions = transactions.filter(
+    (t) => t.date >= monthStart && t.date <= monthEnd
+  );
 
-  const handleAddExpense = (e: FormEvent) => {
-    e.preventDefault();
-    const amount = parseFloat(newAmount);
-    if (isNaN(amount) || amount <= 0) return;
-    const expense: Expense = {
-      id: `exp-${Date.now()}`,
-      description: newDescription,
-      amount,
-      category: newCategory || "Other",
-      date: new Date().toISOString().split("T")[0],
-    };
-    const updated = [expense, ...expenses];
-    setExpenses(updated);
-    localStorage.setItem(EXPENSES_KEY, JSON.stringify(updated));
-    setNewDescription("");
-    setNewAmount("");
-    setNewCategory("");
-    setShowAddForm(false);
-  };
+  // Calculate totals
+  const totalIncome = monthlyTransactions
+    .filter((t) => t.type === "income")
+    .reduce((sum, t) => sum + t.amount, 0);
 
+  const totalExpenses = monthlyTransactions
+    .filter((t) => t.type === "expense")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const netBalance = totalIncome - totalExpenses;
+  const savingsRate = totalIncome > 0 ? calculatePercentage(netBalance, totalIncome) : 0;
+
+  // Budget status
+  const budgetStatus = budgets.map((budget) => {
+    const spent = monthlyTransactions
+      .filter((t) => t.type === "expense" && t.category === budget.category)
+      .reduce((sum, t) => sum + t.amount, 0);
+    return { ...budget, spent, isOver: spent > budget.limit };
+  });
+  const budgetsOnTrack = budgetStatus.filter((b) => !b.isOver).length;
+  const budgetsOver = budgetStatus.filter((b) => b.isOver).length;
+
+  // Upcoming bills (next 7 days)
+  const today = new Date();
+  const upcomingBills = bills.filter((bill) => {
+    if (bill.isPaid) return false;
+    const dueDay = bill.dueDate;
+    const currentDay = today.getDate();
+    // Simple check: due within next 7 days this month
+    return dueDay >= currentDay && dueDay <= currentDay + 7;
+  });
+
+  // Savings progress
+  const totalSavingsTarget = savingsGoals.reduce(
+    (sum, g) => sum + g.targetAmount,
+    0
+  );
+  const totalSavingsCurrent = savingsGoals.reduce(
+    (sum, g) => sum + g.currentAmount,
+    0
+  );
+  const savingsProgress =
+    totalSavingsTarget > 0
+      ? calculatePercentage(totalSavingsCurrent, totalSavingsTarget)
+      : 0;
+
+  // Recent transactions (last 5)
+  const recentTransactions = [...transactions]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
+
+  // Spending by category
+  const spendingByCategory = monthlyTransactions
+    .filter((t) => t.type === "expense")
+    .reduce<Record<string, number>>((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + t.amount;
+      return acc;
+    }, {});
+  const maxCategorySpending = Math.max(
+    ...Object.values(spendingByCategory),
+    1
+  );
+
+  // Goal label
   const goalLabel = (() => {
     const map: Record<string, string> = {
       saving: "Build savings",
@@ -138,6 +144,10 @@ export default function DashboardPage() {
     };
     return map[onboarding?.financialGoal || ""] || "Financial wellness";
   })();
+
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   return (
     <>
@@ -149,199 +159,259 @@ export default function DashboardPage() {
             Welcome back, {user?.name || "User"}!
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Your goal: {goalLabel} | Income: {onboarding?.incomeRange || "Not set"}
+            Your goal: {goalLabel} | Income: {incomeRange || "Not set"}
           </p>
         </header>
 
-        {/* Dashboard grid */}
+        {/* Summary cards row */}
+        <section
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          aria-label="Financial summary"
+          id="tour-budget-overview"
+        >
+          {/* Total Income */}
+          <article className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Income This Month
+            </h2>
+            <p className="mt-2 text-2xl font-bold text-green-600">
+              {formatCurrency(totalIncome)}
+            </p>
+          </article>
+
+          {/* Total Expenses */}
+          <article className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Expenses This Month
+            </h2>
+            <p className="mt-2 text-2xl font-bold text-red-600">
+              {formatCurrency(totalExpenses)}
+            </p>
+          </article>
+
+          {/* Net Balance */}
+          <article className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Net Balance
+            </h2>
+            <p
+              className={`mt-2 text-2xl font-bold ${
+                netBalance >= 0 ? "text-primary-600" : "text-red-600"
+              }`}
+            >
+              {formatCurrency(netBalance)}
+            </p>
+          </article>
+
+          {/* Savings Rate */}
+          <article className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Savings Rate
+            </h2>
+            <p className="mt-2 text-2xl font-bold text-primary-600">
+              {savingsRate}%
+            </p>
+            <p className="mt-1 text-xs text-neutral-400">of monthly income</p>
+          </article>
+        </section>
+
+        {/* Middle row: Budget status, Upcoming bills, Savings progress */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Budget Overview */}
+          {/* Budget Status */}
           <section
-            id="tour-budget-overview"
             className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
-            aria-label="Budget overview"
+            aria-label="Budget status"
           >
             <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              Budget Overview
+              Budget Status
             </h2>
-            <div className="mt-3">
-              <div className="flex items-end justify-between">
-                <span className="text-2xl font-bold text-neutral-900">
-                  ${totalSpending.toFixed(0)}
-                </span>
-                <span className="text-sm text-neutral-500">
-                  of ${monthlyBudget.toLocaleString()}
-                </span>
-              </div>
-              <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-neutral-100">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    budgetPercentage > 80 ? "bg-red-500" : "bg-primary-500"
-                  }`}
-                  style={{ width: `${budgetPercentage}%` }}
-                />
-              </div>
-              <p className="mt-2 text-xs text-neutral-400">
-                {budgetPercentage.toFixed(0)}% of monthly budget used
+            {budgets.length === 0 ? (
+              <p className="mt-3 text-sm text-neutral-400">
+                No budgets set yet.
               </p>
-            </div>
+            ) : (
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block h-3 w-3 rounded-full bg-green-500" />
+                    <span className="text-sm text-neutral-700">
+                      {budgetsOnTrack} on track
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+                    <span className="text-sm text-neutral-700">
+                      {budgetsOver} over budget
+                    </span>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {budgetStatus.slice(0, 3).map((b) => (
+                    <li key={b.id}>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-neutral-700">
+                          {b.category}
+                        </span>
+                        <span className="text-neutral-500">
+                          {formatCurrency(b.spent)} / {formatCurrency(b.limit)}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            b.isOver ? "bg-red-500" : "bg-primary-500"
+                          }`}
+                          style={{
+                            width: `${Math.min(
+                              calculatePercentage(b.spent, b.limit),
+                              100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
 
-          {/* Savings Goal */}
+          {/* Upcoming Bills */}
           <section
+            className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
+            aria-label="Upcoming bills"
+          >
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+              Upcoming Bills (7 Days)
+            </h2>
+            {upcomingBills.length === 0 ? (
+              <p className="mt-3 text-sm text-neutral-400">
+                No bills due in the next 7 days.
+              </p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {upcomingBills.map((bill) => (
+                  <li
+                    key={bill.id}
+                    className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-neutral-800">
+                        {bill.name}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        Due: {bill.dueDate}th
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-neutral-900">
+                      {formatCurrency(bill.amount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {/* Savings Progress */}
+          <section
+            className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
+            aria-label="Savings progress"
             id="tour-savings-goal"
-            className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
-            aria-label="Savings goal"
           >
             <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              Savings Goal
+              Savings Progress
             </h2>
-            <div className="mt-3">
-              <div className="flex items-end justify-between">
-                <span className="text-2xl font-bold text-primary-600">
-                  ${currentSavings.toFixed(0)}
-                </span>
-                <span className="text-sm text-neutral-500">
-                  of ${savingsTarget.toLocaleString()}
-                </span>
-              </div>
-              <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-neutral-100">
-                <div
-                  className="h-full rounded-full bg-primary-400 transition-all"
-                  style={{ width: `${savingsPercentage}%` }}
-                />
-              </div>
-              <p className="mt-2 text-xs text-neutral-400">
-                {savingsPercentage.toFixed(0)}% of monthly target reached
+            {savingsGoals.length === 0 ? (
+              <p className="mt-3 text-sm text-neutral-400">
+                No savings goals yet.
               </p>
-            </div>
-          </section>
-
-          {/* Quick Actions */}
-          <section
-            id="tour-quick-actions"
-            className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
-            aria-label="Quick actions"
-          >
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              Quick Actions
-            </h2>
-            <div className="mt-3 grid gap-2">
-              <button
-                type="button"
-                onClick={() => setShowAddForm(true)}
-                className="w-full rounded-lg bg-primary-50 px-4 py-2.5 text-left text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100"
-              >
-                + Add Expense
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-lg bg-neutral-50 px-4 py-2.5 text-left text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
-              >
-                Set Budget
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-lg bg-neutral-50 px-4 py-2.5 text-left text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
-              >
-                View Reports
-              </button>
-            </div>
+            ) : (
+              <div className="mt-3">
+                <div className="flex items-end justify-between">
+                  <span className="text-2xl font-bold text-primary-600">
+                    {savingsProgress}%
+                  </span>
+                  <span className="text-xs text-neutral-500">
+                    {formatCurrency(totalSavingsCurrent)} /{" "}
+                    {formatCurrency(totalSavingsTarget)}
+                  </span>
+                </div>
+                <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div
+                    className="h-full rounded-full bg-primary-400 transition-all"
+                    style={{ width: `${savingsProgress}%` }}
+                  />
+                </div>
+                <ul className="mt-3 space-y-1.5">
+                  {savingsGoals.map((goal) => (
+                    <li
+                      key={goal.id}
+                      className="flex items-center justify-between text-xs"
+                    >
+                      <span className="text-neutral-700">{goal.name}</span>
+                      <span className="text-neutral-500">
+                        {calculatePercentage(
+                          goal.currentAmount,
+                          goal.targetAmount
+                        )}
+                        %
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
         </div>
 
-        {/* Expense Tracker */}
+        {/* Recent Transactions */}
         <section
-          id="tour-expense-tracker"
           className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
-          aria-label="Expense tracker"
+          aria-label="Recent transactions"
+          id="tour-expense-tracker"
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              Recent Expenses
+              Recent Transactions
             </h2>
-            <button
-              type="button"
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-600"
+            <Link
+              href="/dashboard/transactions"
+              className="text-xs font-medium text-primary-600 hover:text-primary-700"
             >
-              {showAddForm ? "Cancel" : "+ Add"}
-            </button>
+              View All
+            </Link>
           </div>
-
-          {/* Add expense form */}
-          {showAddForm && (
-            <form onSubmit={handleAddExpense} className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <label htmlFor="exp-desc" className="block text-xs font-medium text-neutral-600">
-                    Description
-                  </label>
-                  <input
-                    id="exp-desc"
-                    type="text"
-                    required
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm"
-                    placeholder="Coffee shop"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="exp-amount" className="block text-xs font-medium text-neutral-600">
-                    Amount ($)
-                  </label>
-                  <input
-                    id="exp-amount"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                    value={newAmount}
-                    onChange={(e) => setNewAmount(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm"
-                    placeholder="5.00"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="exp-cat" className="block text-xs font-medium text-neutral-600">
-                    Category
-                  </label>
-                  <input
-                    id="exp-cat"
-                    type="text"
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-sm"
-                    placeholder="Food & Dining"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="mt-3 rounded-lg bg-primary-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-600"
-              >
-                Save Expense
-              </button>
-            </form>
+          {recentTransactions.length === 0 ? (
+            <p className="mt-4 text-sm text-neutral-400">
+              No transactions recorded yet.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-neutral-100">
+              {recentTransactions.map((t) => (
+                <li
+                  key={t.id}
+                  className="flex items-center justify-between py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-neutral-800">
+                      {t.description}
+                    </p>
+                    <p className="text-xs text-neutral-400">
+                      {t.category} &middot; {formatDateShort(t.date)}
+                    </p>
+                  </div>
+                  <span
+                    className={`ml-3 whitespace-nowrap text-sm font-semibold ${
+                      t.type === "expense" ? "text-red-600" : "text-green-600"
+                    }`}
+                  >
+                    {t.type === "expense" ? "-" : "+"}
+                    {formatCurrency(t.amount)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           )}
-
-          {/* Expenses list */}
-          <ul className="mt-4 divide-y divide-neutral-100">
-            {expenses.slice(0, 8).map((expense) => (
-              <li key={expense.id} className="flex items-center justify-between py-3">
-                <div>
-                  <p className="text-sm font-medium text-neutral-800">{expense.description}</p>
-                  <p className="text-xs text-neutral-400">
-                    {expense.category} &middot; {expense.date}
-                  </p>
-                </div>
-                <span className="text-sm font-semibold text-neutral-900">
-                  -${expense.amount.toFixed(2)}
-                </span>
-              </li>
-            ))}
-          </ul>
         </section>
 
         {/* Spending by Category */}
@@ -352,24 +422,68 @@ export default function DashboardPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
             Spending by Category
           </h2>
-          <div className="mt-4 space-y-3">
-            {Object.entries(spendingByCategory)
-              .sort(([, a], [, b]) => b - a)
-              .map(([category, amount]) => (
-                <div key={category}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-neutral-700">{category}</span>
-                    <span className="text-neutral-500">${amount.toFixed(2)}</span>
+          {Object.keys(spendingByCategory).length === 0 ? (
+            <p className="mt-4 text-sm text-neutral-400">
+              No spending data this month.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {Object.entries(spendingByCategory)
+                .sort(([, a], [, b]) => b - a)
+                .map(([category, amount]) => (
+                  <div key={category}>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-neutral-700">
+                        {category}
+                      </span>
+                      <span className="text-neutral-500">
+                        {formatCurrency(amount)}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${(amount / maxCategorySpending) * 100}%`,
+                          backgroundColor: getCategoryColor(category),
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-                    <div
-                      className="h-full rounded-full bg-primary-400"
-                      style={{ width: `${(amount / maxCategorySpending) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-          </div>
+                ))}
+            </div>
+          )}
+        </section>
+
+        {/* Quick Actions */}
+        <section
+          className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm"
+          aria-label="Quick actions"
+          id="tour-quick-actions"
+        >
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            Quick Actions
+          </h2>
+          <nav className="mt-3 grid gap-2 sm:grid-cols-3" aria-label="Quick action links">
+            <Link
+              href="/dashboard/transactions"
+              className="rounded-lg bg-primary-50 px-4 py-2.5 text-center text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100"
+            >
+              + Add Expense
+            </Link>
+            <Link
+              href="/dashboard/budgets"
+              className="rounded-lg bg-neutral-50 px-4 py-2.5 text-center text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
+            >
+              Set Budget
+            </Link>
+            <Link
+              href="/dashboard/reports"
+              className="rounded-lg bg-neutral-50 px-4 py-2.5 text-center text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
+            >
+              View Reports
+            </Link>
+          </nav>
         </section>
       </div>
     </>

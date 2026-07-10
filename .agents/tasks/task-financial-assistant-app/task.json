@@ -9,6 +9,7 @@
     "tests": "pass",
     "test_quality": "pass",
     "docker_build": "skipped",
-    "summary": "bun run build passes - all routes generated (/, /login, /onboarding, /dashboard). bun run lint passes with 0 errors (1 intentional warning for unused _password parameter in simulated auth)."
-  }
+    "summary": "bun run build passes - all routes generated (/, /login, /onboarding, /dashboard). bun run lint passes with 0 errors (1 intentional warning for unused _password parameter in simulated auth). Semantic review v2 APPROVED."
+  },
+  "pr_url": "https://github.com/xedricandreiviar/kiro-web-week4/pull/2"
 }
