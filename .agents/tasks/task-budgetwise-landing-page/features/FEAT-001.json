@@ -1,0 +1,34 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement the BudgetWise landing page with Hero section, Features section, Email capture form, Header, and Footer. Replace the default Next.js starter page with a fully responsive, accessible, and semantically structured landing page.",
+  "status": "in_progress",
+  "steps": [
+    "Update app/layout.tsx: Change metadata title to 'BudgetWise - Personal Finance Assistant' and description to match the product value proposition. Keep Geist fonts and existing body classes.",
+    "Update app/globals.css: Extend the @theme inline block with BudgetWise brand colors (a green/teal primary palette for finance, neutral grays for text). Keep the existing Tailwind import and font variables.",
+    "Create app/components/Header.tsx: A semantic <header> with <nav> containing the BudgetWise brand name/logo and a CTA button linking to the email form. Use responsive Tailwind classes. This is a Server Component (no interactivity needed).",
+    "Create app/components/Hero.tsx: A semantic <section> with a clear value proposition headline ('Track your spending, take control of your budget'), a supporting subheadline explaining the product in plain language, and a primary CTA button that scrolls to the email capture form. Use responsive layout (full-width on mobile, constrained max-width on desktop). This is a Server Component.",
+    "Create app/components/Features.tsx: A semantic <section> with id='features' containing two feature cards - (1) Expense Tracking: describe the actual mechanic of logging and categorizing transactions, and (2) Budgeting: describe the actual mechanic of setting spending limits by category and tracking progress. Use a responsive grid (1 column on mobile, 2 on md+). Each feature card uses semantic HTML (heading + paragraph). This is a Server Component.",
+    "Create app/components/EmailSignup.tsx: A 'use client' component with a semantic <section> containing an email capture form. Implement client-side validation (valid email format check), submit button, loading state, success state ('You are on the list!'), and error state ('Please enter a valid email address'). The form submission should be a simulated action (setTimeout to mimic async, no actual backend). Use aria-live region for status messages. Ensure keyboard navigability (all form controls focusable, proper labels).",
+    "Create app/components/Footer.tsx: A semantic <footer> with copyright text and minimal links. Server Component.",
+    "Rewrite app/page.tsx: Remove all existing starter content. Import and compose Header, Hero, Features, EmailSignup, and Footer components in order. Wrap in semantic landmarks. Ensure the page works with JavaScript disabled for core content (the form submit will require JS, which is acceptable per PRD).",
+    "Ensure full responsiveness: All components must work from 360px mobile to 1440px desktop. Use Tailwind responsive prefixes (sm:, md:, lg:, xl:). No horizontal overflow at any breakpoint.",
+    "Ensure accessibility: All interactive elements are keyboard focusable. Form inputs have associated labels (htmlFor or aria-label). Status messages use aria-live='polite'. Heading hierarchy is logical (h1 in Hero, h2 for section titles). Skip-to-content link or proper landmark structure (<header>, <main>, <footer>) for screen readers."
+  ],
+  "acceptance_criteria": [
+    "Running 'bun run build' produces a successful static build with no errors",
+    "Running 'bun run lint' passes with no errors",
+    "Hero section contains a clear value proposition heading and CTA button visible above the fold",
+    "Features section describes expense tracking and budgeting with benefit-oriented descriptions (no filler adjectives)",
+    "Email capture form validates input client-side and shows distinct success and error states",
+    "Page uses semantic HTML landmarks: <header>, <main>, <section>, <footer>",
+    "All layout sections use responsive Tailwind CSS utility classes",
+    "Page is keyboard navigable - all interactive elements (buttons, links, form inputs) are focusable via Tab"
+  ],
+  "verification": [
+    "Run 'bun run build' and confirm successful static page generation",
+    "Run 'bun run lint' and confirm no lint errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
