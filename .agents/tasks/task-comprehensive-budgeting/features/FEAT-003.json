@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Build Budgets page (create/track budgets per category with progress and alerts), Income tracking page (salary, freelance, multiple income sources), and Savings Goals page (multiple goals with timelines and progress).",
+  "status": "in_progress",
+  "steps": [
+    "Create app/dashboard/budgets/page.tsx - Budget management page with: (1) Overview showing total budgeted vs total spent this month, (2) 'Create Budget' button/form to add a budget for a specific category with a monthly limit, (3) Budget cards grid - each card shows category name, spent amount, budget limit, progress bar (green < 75%, yellow 75-90%, red > 90%), remaining amount, (4) Edit/delete budget actions, (5) Visual alert/warning badge when a budget exceeds 80% or is over limit, (6) Option to copy last month's budgets to this month.",
+    "Create app/dashboard/income/page.tsx - Income tracking page with: (1) Total income this month + comparison with last month (up/down indicator), (2) Add income form with: source name, amount, type (salary/freelance/investment/rental/other), frequency (one-time/recurring), date, (3) Income list sorted by date showing source, amount, type badge, date, (4) Income by source breakdown (visual bar chart showing proportion from each source), (5) Edit/delete income entries, (6) Monthly income trend (simple text-based month-over-month comparison).",
+    "Create app/dashboard/savings/page.tsx - Savings goals page with: (1) Overall savings summary (total saved across all goals, total target), (2) 'Create Goal' button/form with: name, target amount, current amount, deadline date, color selection, (3) Goal cards with: name, progress ring or bar showing currentAmount/targetAmount, amount remaining, days remaining until deadline, monthly contribution needed to reach goal on time, (4) 'Add funds' quick action on each goal to add money toward it, (5) Edit/delete goal actions, (6) Completed goals section (goals where currentAmount >= targetAmount)."
+  ],
+  "acceptance_criteria": [
+    "Budgets page allows creating, editing, deleting category budgets",
+    "Budget progress bars change color based on spending percentage",
+    "Budget alerts visually warn when spending exceeds 80% of limit",
+    "Income page tracks multiple income sources with types",
+    "Income page shows month-over-month comparison",
+    "Savings goals page supports multiple goals with deadlines",
+    "Users can add funds to savings goals",
+    "Completed goals are shown separately",
+    "All data persists in localStorage",
+    "npm run build completes without errors"
+  ],
+  "verification": ["npm run build", "npm run lint"],
+  "blocked_reason": null,
+  "findings": ""
+}
