@@ -68,6 +68,35 @@ function isOverdue(bill: Bill): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const currentDay = today.getDate();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // If lastPaidDate exists, check if the bill was paid this billing cycle.
+  // A bill is overdue if it hasn't been paid since its last due date.
+  if (bill.lastPaidDate) {
+    const lastPaid = new Date(bill.lastPaidDate);
+    lastPaid.setHours(0, 0, 0, 0);
+
+    // Determine the most recent due date (could be this month or last month)
+    let mostRecentDueDate: Date;
+    const dueThisMonth = new Date(currentYear, currentMonth, Math.min(bill.dueDate, new Date(currentYear, currentMonth + 1, 0).getDate()));
+
+    if (dueThisMonth <= today) {
+      // Due date already passed this month
+      mostRecentDueDate = dueThisMonth;
+    } else {
+      // Due date is still ahead this month, so the most recent past due was last month
+      const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      const daysInLastMonth = new Date(lastMonthYear, lastMonth + 1, 0).getDate();
+      mostRecentDueDate = new Date(lastMonthYear, lastMonth, Math.min(bill.dueDate, daysInLastMonth));
+    }
+
+    // Overdue if the last payment was before the most recent due date
+    return lastPaid < mostRecentDueDate;
+  }
+
+  // No lastPaidDate recorded: fall back to simple day-of-month check
   return currentDay > bill.dueDate;
 }
 

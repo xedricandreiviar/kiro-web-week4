@@ -97,37 +97,44 @@ function safeGetItem<T>(key: string): T[] {
   }
 }
 
-function safeSetItem<T>(key: string, data: T[]): void {
-  if (typeof window === "undefined") return;
+/**
+ * Attempts to write data to localStorage. Returns true on success, false on failure
+ * (e.g., quota exceeded). Callers can use the return value to surface feedback to the user.
+ */
+function safeSetItem<T>(key: string, data: T[]): boolean {
+  if (typeof window === "undefined") return false;
   try {
     localStorage.setItem(key, JSON.stringify(data));
+    return true;
   } catch {
-    // Storage quota exceeded or other error - fail silently
+    // Storage quota exceeded or other write error
+    console.warn(`[BudgetWise] Failed to write to localStorage key "${key}". Storage may be full.`);
+    return false;
   }
 }
 
-function createEntity<T extends { id: string }>(key: string, entity: T): T {
+function createEntity<T extends { id: string }>(key: string, entity: T): { data: T; success: boolean } {
   const items = safeGetItem<T>(key);
   items.push(entity);
-  safeSetItem(key, items);
-  return entity;
+  const success = safeSetItem(key, items);
+  return { data: entity, success };
 }
 
-function updateEntity<T extends { id: string }>(key: string, id: string, updates: Partial<T>): T | null {
+function updateEntity<T extends { id: string }>(key: string, id: string, updates: Partial<T>): { data: T | null; success: boolean } {
   const items = safeGetItem<T>(key);
   const index = items.findIndex((item) => item.id === id);
-  if (index === -1) return null;
+  if (index === -1) return { data: null, success: false };
   items[index] = { ...items[index], ...updates };
-  safeSetItem(key, items);
-  return items[index];
+  const success = safeSetItem(key, items);
+  return { data: items[index], success };
 }
 
 function deleteEntity<T extends { id: string }>(key: string, id: string): boolean {
   const items = safeGetItem<T>(key);
   const filtered = items.filter((item) => item.id !== id);
   if (filtered.length === items.length) return false;
-  safeSetItem(key, filtered);
-  return true;
+  const success = safeSetItem(key, filtered);
+  return success;
 }
 
 function getEntityById<T extends { id: string }>(key: string, id: string): T | null {
@@ -148,11 +155,11 @@ export const transactionStorage = {
     return getEntityById<Transaction>(STORAGE_KEYS.transactions, id);
   },
 
-  create(transaction: Transaction): Transaction {
+  create(transaction: Transaction): { data: Transaction; success: boolean } {
     return createEntity<Transaction>(STORAGE_KEYS.transactions, transaction);
   },
 
-  update(id: string, updates: Partial<Transaction>): Transaction | null {
+  update(id: string, updates: Partial<Transaction>): { data: Transaction | null; success: boolean } {
     return updateEntity<Transaction>(STORAGE_KEYS.transactions, id, updates);
   },
 
@@ -189,11 +196,11 @@ export const budgetStorage = {
     return getEntityById<Budget>(STORAGE_KEYS.budgets, id);
   },
 
-  create(budget: Budget): Budget {
+  create(budget: Budget): { data: Budget; success: boolean } {
     return createEntity<Budget>(STORAGE_KEYS.budgets, budget);
   },
 
-  update(id: string, updates: Partial<Budget>): Budget | null {
+  update(id: string, updates: Partial<Budget>): { data: Budget | null; success: boolean } {
     return updateEntity<Budget>(STORAGE_KEYS.budgets, id, updates);
   },
 
@@ -215,11 +222,11 @@ export const savingsGoalStorage = {
     return getEntityById<SavingsGoal>(STORAGE_KEYS.savingsGoals, id);
   },
 
-  create(goal: SavingsGoal): SavingsGoal {
+  create(goal: SavingsGoal): { data: SavingsGoal; success: boolean } {
     return createEntity<SavingsGoal>(STORAGE_KEYS.savingsGoals, goal);
   },
 
-  update(id: string, updates: Partial<SavingsGoal>): SavingsGoal | null {
+  update(id: string, updates: Partial<SavingsGoal>): { data: SavingsGoal | null; success: boolean } {
     return updateEntity<SavingsGoal>(STORAGE_KEYS.savingsGoals, id, updates);
   },
 
@@ -241,11 +248,11 @@ export const billStorage = {
     return getEntityById<Bill>(STORAGE_KEYS.bills, id);
   },
 
-  create(bill: Bill): Bill {
+  create(bill: Bill): { data: Bill; success: boolean } {
     return createEntity<Bill>(STORAGE_KEYS.bills, bill);
   },
 
-  update(id: string, updates: Partial<Bill>): Bill | null {
+  update(id: string, updates: Partial<Bill>): { data: Bill | null; success: boolean } {
     return updateEntity<Bill>(STORAGE_KEYS.bills, id, updates);
   },
 
@@ -267,11 +274,11 @@ export const debtStorage = {
     return getEntityById<Debt>(STORAGE_KEYS.debts, id);
   },
 
-  create(debt: Debt): Debt {
+  create(debt: Debt): { data: Debt; success: boolean } {
     return createEntity<Debt>(STORAGE_KEYS.debts, debt);
   },
 
-  update(id: string, updates: Partial<Debt>): Debt | null {
+  update(id: string, updates: Partial<Debt>): { data: Debt | null; success: boolean } {
     return updateEntity<Debt>(STORAGE_KEYS.debts, id, updates);
   },
 
@@ -293,11 +300,11 @@ export const assetStorage = {
     return getEntityById<Asset>(STORAGE_KEYS.assets, id);
   },
 
-  create(asset: Asset): Asset {
+  create(asset: Asset): { data: Asset; success: boolean } {
     return createEntity<Asset>(STORAGE_KEYS.assets, asset);
   },
 
-  update(id: string, updates: Partial<Asset>): Asset | null {
+  update(id: string, updates: Partial<Asset>): { data: Asset | null; success: boolean } {
     return updateEntity<Asset>(STORAGE_KEYS.assets, id, updates);
   },
 
@@ -319,11 +326,11 @@ export const liabilityStorage = {
     return getEntityById<Liability>(STORAGE_KEYS.liabilities, id);
   },
 
-  create(liability: Liability): Liability {
+  create(liability: Liability): { data: Liability; success: boolean } {
     return createEntity<Liability>(STORAGE_KEYS.liabilities, liability);
   },
 
-  update(id: string, updates: Partial<Liability>): Liability | null {
+  update(id: string, updates: Partial<Liability>): { data: Liability | null; success: boolean } {
     return updateEntity<Liability>(STORAGE_KEYS.liabilities, id, updates);
   },
 

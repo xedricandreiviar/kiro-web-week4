@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, ChangeEvent } from "react";
 import { useAuth } from "../../context/AuthContext";
 import {
   transactionStorage,
@@ -70,6 +70,7 @@ export default function SettingsPage() {
   // Data management state
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [dataCleared, setDataCleared] = useState(false);
+  const [importStatus, setImportStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const handleProfileSave = (e: FormEvent) => {
     e.preventDefault();
@@ -121,6 +122,62 @@ export default function SettingsPage() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const handleImportData = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = event.target?.result as string;
+        const data = JSON.parse(json);
+
+        // Validate the structure has expected keys
+        const validKeys = ["transactions", "budgets", "savingsGoals", "bills", "debts", "assets", "liabilities"];
+        const hasValidData = validKeys.some((key) => Array.isArray(data[key]));
+
+        if (!hasValidData) {
+          setImportStatus({ type: "error", message: "Invalid file format. Expected a BudgetWise export JSON." });
+          setTimeout(() => setImportStatus(null), 5000);
+          return;
+        }
+
+        // Import each entity type if present in the file
+        if (Array.isArray(data.transactions)) {
+          localStorage.setItem("budgetwise_transactions", JSON.stringify(data.transactions));
+        }
+        if (Array.isArray(data.budgets)) {
+          localStorage.setItem("budgetwise_budgets", JSON.stringify(data.budgets));
+        }
+        if (Array.isArray(data.savingsGoals)) {
+          localStorage.setItem("budgetwise_savings_goals", JSON.stringify(data.savingsGoals));
+        }
+        if (Array.isArray(data.bills)) {
+          localStorage.setItem("budgetwise_bills", JSON.stringify(data.bills));
+        }
+        if (Array.isArray(data.debts)) {
+          localStorage.setItem("budgetwise_debts", JSON.stringify(data.debts));
+        }
+        if (Array.isArray(data.assets)) {
+          localStorage.setItem("budgetwise_assets", JSON.stringify(data.assets));
+        }
+        if (Array.isArray(data.liabilities)) {
+          localStorage.setItem("budgetwise_liabilities", JSON.stringify(data.liabilities));
+        }
+
+        setImportStatus({ type: "success", message: "Data imported successfully! Refresh the page to see updated data." });
+        setTimeout(() => setImportStatus(null), 5000);
+      } catch {
+        setImportStatus({ type: "error", message: "Failed to parse the file. Make sure it is a valid JSON export." });
+        setTimeout(() => setImportStatus(null), 5000);
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset the input so the same file can be re-imported
+    e.target.value = "";
   };
 
   const handleClearData = () => {
@@ -317,6 +374,25 @@ export default function SettingsPage() {
               </button>
               <p className="text-xs text-neutral-500">Download all your financial data as a JSON file.</p>
             </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <label className="cursor-pointer rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+                Import Data (JSON)
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleImportData}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-neutral-500">Restore data from a previously exported JSON file.</p>
+            </div>
+
+            {importStatus && (
+              <p className={`text-sm ${importStatus.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                {importStatus.message}
+              </p>
+            )}
 
             <div className="border-t border-neutral-200 pt-4">
               {!showClearConfirm ? (

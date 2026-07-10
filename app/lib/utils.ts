@@ -43,10 +43,15 @@ export function calculatePercentage(current: number, total: number): number {
 }
 
 /**
- * Generate a unique ID string
+ * Generate a unique ID string using crypto.randomUUID() to avoid collisions
+ * during rapid sequential creation (e.g., seed loop).
  */
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}-${Math.random().toString(36).substring(2, 7)}`;
 }
 
 /**

@@ -487,6 +487,16 @@ export default function NetWorthPage() {
           </button>
         </div>
 
+        {/* Hint about debt inclusion to prevent double-counting */}
+        {debts.length > 0 && (
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-xs text-amber-800">
+              <span className="font-semibold">Note:</span> Debts from the Debts page are automatically included below as read-only liabilities.
+              Avoid adding the same debt manually here to prevent double-counting.
+            </p>
+          </div>
+        )}
+
         {/* Liability Form */}
         {showLiabilityForm && (
           <div className="mb-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4">

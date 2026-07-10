@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useMemo, FormEvent } from "react";
 import { debtStorage, Debt } from "../../lib/storage";
 import { formatCurrency, generateId, calculatePercentage } from "../../lib/utils";
 
@@ -110,9 +110,9 @@ export default function DebtsPage() {
       ? debts.reduce((sum, d) => sum + d.interestRate, 0) / debts.length
       : 0;
 
-  // Payoff strategies
-  const avalanche = calculateStrategy(debts, "avalanche");
-  const snowball = calculateStrategy(debts, "snowball");
+  // Payoff strategies - memoized to avoid recomputing on form/payment state changes
+  const avalanche = useMemo(() => calculateStrategy(debts, "avalanche"), [debts]);
+  const snowball = useMemo(() => calculateStrategy(debts, "snowball"), [debts]);
 
   // Debt-free date projection based on minimum payments only
   const maxPayoffMonths = debts.reduce((max, d) => {

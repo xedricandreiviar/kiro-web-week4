@@ -43,11 +43,37 @@ function getEventsForDay(
     }
   });
 
-  // Recurring income on this day (check if original transaction date day-of-month matches)
+  // Recurring income on this day
+  // Note: For non-monthly frequencies (weekly, biweekly), pinning to day-of-month
+  // is an approximation. A proper implementation would compute exact recurrence dates.
+  // Only show monthly recurring income on the matching day-of-month.
   recurringIncome.forEach((t) => {
     const tDate = new Date(t.date);
-    if (tDate.getDate() === day) {
-      events.push({ type: "income", name: t.description, amount: t.amount });
+    const frequency = t.recurringFrequency;
+
+    if (frequency === "monthly" || frequency === "yearly") {
+      // Monthly/yearly: show on the same day-of-month as the original transaction
+      if (tDate.getDate() === day) {
+        events.push({ type: "income", name: t.description, amount: t.amount });
+      }
+    } else if (frequency === "weekly") {
+      // Weekly: show on matching day-of-week
+      const cellDate = new Date(year, month, day);
+      if (cellDate.getDay() === tDate.getDay()) {
+        events.push({ type: "income", name: t.description, amount: t.amount });
+      }
+    } else if (frequency === "biweekly") {
+      // Biweekly: show every 14 days from original date
+      const cellDate = new Date(year, month, day);
+      const diffDays = Math.round((cellDate.getTime() - tDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays % 14 === 0) {
+        events.push({ type: "income", name: t.description, amount: t.amount });
+      }
+    } else {
+      // Default/daily: show on the matching day-of-month
+      if (tDate.getDate() === day) {
+        events.push({ type: "income", name: t.description, amount: t.amount });
+      }
     }
   });
 
