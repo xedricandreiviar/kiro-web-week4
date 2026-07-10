@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Replace all USD/Dollar currency references with Philippine Peso (PHP) throughout the app. This includes the formatCurrency utility function, all INCOME_RANGES and SAVINGS_TARGETS constants, form field labels showing ($), and any inline dollar references.",
+  "status": "completed",
+  "steps": [
+    "Update app/lib/utils.ts: Change formatCurrency() to use currency: 'PHP' and locale 'en-PH' so it formats as PHP peso (the Intl formatter will use the peso sign). Update the JSDoc comment accordingly.",
+    "Update app/onboarding/page.tsx: Change INCOME_RANGES from dollar amounts to peso equivalents (multiply roughly by 56 for realistic Filipino ranges, e.g., 'Under 50,000', '50,000 - 100,000', etc.) with the peso sign. Change SAVINGS_TARGETS similarly.",
+    "Update app/dashboard/settings/page.tsx: Change INCOME_RANGES and SAVINGS_TARGETS to match the same peso values used in onboarding.",
+    "Update app/lib/seed.ts: Change the incomeMap keys to match new peso-based INCOME_RANGES strings, and update the corresponding numeric values to realistic peso amounts. Change the targetMap keys to match new SAVINGS_TARGETS strings with corresponding peso values.",
+    "Update app/dashboard/bills/page.tsx: Change the form label 'Amount ($)' to 'Amount (PHP)' or 'Amount'.",
+    "Update app/dashboard/budgets/page.tsx: Change the form label 'Monthly Limit ($)' to 'Monthly Limit (PHP)' or 'Monthly Limit'.",
+    "Update app/dashboard/income/page.tsx: Change the form label 'Amount ($)' to 'Amount (PHP)' or 'Amount'.",
+    "Update app/dashboard/debts/page.tsx: Change form labels 'Original Amount ($)', 'Remaining Amount ($)', 'Minimum Payment ($)' to use PHP instead of $. Also change 'Payoff Strategies (with extra $100/month)' to use peso amount.",
+    "Update app/dashboard/savings/page.tsx: Change form labels 'Target Amount ($)' and 'Current Amount ($)' to use PHP instead of $.",
+    "Update app/dashboard/net-worth/page.tsx: Change form labels 'Value ($)' and 'Amount ($)' to use PHP instead of $.",
+    "Update app/dashboard/transactions/page.tsx: Change form label 'Amount ($)' to use PHP instead of $."
+  ],
+  "acceptance_criteria": [
+    "formatCurrency() outputs amounts with the Philippine Peso sign and PHP currency code",
+    "All INCOME_RANGES display peso amounts with appropriate sign across onboarding, settings, and seed files",
+    "All SAVINGS_TARGETS display peso amounts with appropriate sign across onboarding, settings, and seed files",
+    "All form labels no longer reference ($) but instead reference PHP or the peso sign",
+    "The seed.ts incomeMap and targetMap keys match the new INCOME_RANGES and SAVINGS_TARGETS strings exactly",
+    "npm run build passes with no errors"
+  ],
+  "verification": [
+    "Run npm run build and confirm it completes successfully with no TypeScript errors"
+  ],
+  "blocked_reason": null,
+  "findings": "Build passes with bun (npm not available in sandbox, but bun run build works). Used peso sign character directly in INCOME_RANGES and SAVINGS_TARGETS. The seed.ts had two incomeMap instances (one in generateTransactions, one in generateBudgets) - both updated. Also updated the extraPayment default from 100 to 5000 in calculateStrategy to match the label text."
+}

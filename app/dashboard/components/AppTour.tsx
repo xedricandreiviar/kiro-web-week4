@@ -17,19 +17,19 @@ const TOUR_STEPS: TourStep[] = [
     targetId: "tour-welcome",
   },
   {
-    title: "Budget Overview",
-    description: "Track your monthly budget versus actual spending at a glance. The progress bar shows how much of your budget you have used.",
+    title: "Financial Summary",
+    description: "See your key financial metrics at a glance: monthly income, expenses, net balance, and savings rate all in one place.",
     targetId: "tour-budget-overview",
   },
   {
-    title: "Expense Tracker",
-    description: "View your recent transactions and add new expenses. Everything is stored locally so your data stays private.",
-    targetId: "tour-expense-tracker",
-  },
-  {
-    title: "Savings Goal",
+    title: "Savings Progress",
     description: "Monitor your progress toward your monthly savings target. Stay motivated by watching your goal get closer!",
     targetId: "tour-savings-goal",
+  },
+  {
+    title: "Recent Transactions",
+    description: "View your latest transactions at a glance. Click 'View All' to see your complete transaction history.",
+    targetId: "tour-expense-tracker",
   },
   {
     title: "Quick Actions",

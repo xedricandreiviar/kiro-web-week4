@@ -271,7 +271,7 @@ export default function IncomePage() {
                   htmlFor="income-amount"
                   className="block text-sm font-medium text-neutral-700"
                 >
-                  Amount ($)
+                  Amount (PHP)
                 </label>
                 <input
                   id="income-amount"

@@ -387,7 +387,7 @@ export default function NetWorthPage() {
                 </div>
                 <div>
                   <label htmlFor="asset-value" className="block text-xs font-medium text-neutral-700">
-                    Value ($)
+                    Value (PHP)
                   </label>
                   <input
                     id="asset-value"
@@ -559,7 +559,7 @@ export default function NetWorthPage() {
                 </div>
                 <div>
                   <label htmlFor="liability-amount" className="block text-xs font-medium text-neutral-700">
-                    Amount ($)
+                    Amount (PHP)
                   </label>
                   <input
                     id="liability-amount"

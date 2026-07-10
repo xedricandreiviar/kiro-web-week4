@@ -43,7 +43,7 @@ function getPayoffDate(months: number): string {
 function calculateStrategy(
   debts: Debt[],
   strategy: "avalanche" | "snowball",
-  extraPayment: number = 100
+  extraPayment: number = 5000
 ): { totalMonths: number; totalInterest: number } {
   if (debts.length === 0) return { totalMonths: 0, totalInterest: 0 };
 
@@ -318,7 +318,7 @@ export default function DebtsPage() {
 
               <div>
                 <label htmlFor="debt-total" className="block text-sm font-medium text-neutral-700">
-                  Original Amount ($)
+                  Original Amount (PHP)
                 </label>
                 <input
                   id="debt-total"
@@ -335,7 +335,7 @@ export default function DebtsPage() {
 
               <div>
                 <label htmlFor="debt-remaining" className="block text-sm font-medium text-neutral-700">
-                  Remaining Amount ($)
+                  Remaining Amount (PHP)
                 </label>
                 <input
                   id="debt-remaining"
@@ -369,7 +369,7 @@ export default function DebtsPage() {
 
               <div>
                 <label htmlFor="debt-min" className="block text-sm font-medium text-neutral-700">
-                  Minimum Payment ($)
+                  Minimum Payment (PHP)
                 </label>
                 <input
                   id="debt-min"
@@ -586,7 +586,7 @@ export default function DebtsPage() {
           {/* Payoff Strategy Comparison */}
           <section aria-label="Payoff strategies">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-              Payoff Strategies (with extra $100/month)
+              Payoff Strategies (with extra PHP 5,000/month)
             </h2>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Avalanche */}

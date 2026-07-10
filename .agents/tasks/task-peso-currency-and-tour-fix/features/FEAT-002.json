@@ -1,0 +1,25 @@
+{
+  "id": "FEAT-002",
+  "type": "fix",
+  "description": "Fix the AppTour component so each tour step correctly describes and points to the actual UI elements visible on the dashboard page. Currently the tour steps reference targetId strings that correspond to sections on the dashboard page, but the descriptions and element ordering need to match what is actually rendered. The 'tour-complete' step has no corresponding element on the page. The tour should accurately describe what each highlighted section shows.",
+  "status": "completed",
+  "steps": [
+    "Review the dashboard page (app/dashboard/page.tsx) to understand what each id-annotated section actually contains: 'tour-welcome' is the entire dashboard wrapper div, 'tour-budget-overview' is the summary cards grid (Income, Expenses, Net Balance, Savings Rate), 'tour-savings-goal' is the Savings Progress section, 'tour-expense-tracker' is the Recent Transactions section, 'tour-quick-actions' is the Quick Actions section.",
+    "Update app/dashboard/components/AppTour.tsx TOUR_STEPS to accurately describe what each section shows. The 'Budget Overview' step points to 'tour-budget-overview' which is actually the financial summary cards (Income, Expenses, Net Balance, Savings Rate) - update the description accordingly. The 'Expense Tracker' step should describe Recent Transactions since that is what the element shows. The 'Savings Goal' step describes savings progress which is correct.",
+    "Fix the order of tour steps to match the visual layout top-to-bottom: Welcome (tour-welcome, first/top), Financial Summary Cards (tour-budget-overview, second), Savings Progress (tour-savings-goal, third in middle row), Recent Transactions (tour-expense-tracker, fourth), Quick Actions (tour-quick-actions, fifth/bottom).",
+    "Remove or fix the 'tour-complete' step since there is no element with id='tour-complete' on the page. Either remove it entirely or make it a final congratulatory step that does not point to any element (centered card).",
+    "Ensure descriptions match what the user will actually see when the highlight box appears around each element."
+  ],
+  "acceptance_criteria": [
+    "Each tour step's description accurately describes what the highlighted UI element contains",
+    "Tour steps follow the top-to-bottom visual order of the dashboard page",
+    "No tour step references a targetId that does not exist on the dashboard page (except for a final step which can gracefully handle missing targets by centering)",
+    "The tour card positions correctly relative to highlighted elements",
+    "npm run build passes with no errors"
+  ],
+  "verification": [
+    "Run npm run build and confirm it completes successfully with no TypeScript errors"
+  ],
+  "blocked_reason": null,
+  "findings": "Fixed tour steps: (1) renamed 'Budget Overview' to 'Financial Summary' with accurate description of the 4 summary cards, (2) reordered steps so Savings Progress (tour-savings-goal) comes before Recent Transactions (tour-expense-tracker) matching the visual DOM order, (3) updated 'Expense Tracker' title to 'Recent Transactions' with accurate description, (4) kept the final tour-complete step as-is since the component gracefully centers the card when no target element is found. Build and lint pass."
+}
