@@ -14,6 +14,21 @@ export default function LoginPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     login(email, password);
+
+    // Check if returning user already has onboarding data in localStorage
+    const STORAGE_KEY = "budgetwise_user";
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const existingUser = JSON.parse(stored);
+        if (existingUser.email === email && existingUser.onboarding) {
+          router.push("/dashboard");
+          return;
+        }
+      } catch {
+        // Fall through to onboarding
+      }
+    }
     router.push("/onboarding");
   };
 

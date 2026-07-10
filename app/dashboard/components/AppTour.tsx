@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 
 const TOUR_STORAGE_KEY = "budgetwise_tour_complete";
 
@@ -49,10 +49,32 @@ export default function AppTour() {
     return !localStorage.getItem(TOUR_STORAGE_KEY);
   });
   const [currentStep, setCurrentStep] = useState(0);
+  const hasScrolledRef = useRef(false);
+
+  const scrollToTarget = useCallback((stepIndex: number) => {
+    const step = TOUR_STEPS[stepIndex];
+    const target = document.getElementById(step.targetId);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, []);
+
+  // Scroll to the initial target on first render via ref callback
+  const dialogRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node && !hasScrolledRef.current) {
+        hasScrolledRef.current = true;
+        scrollToTarget(0);
+      }
+    },
+    [scrollToTarget]
+  );
 
   const handleNext = () => {
     if (currentStep < TOUR_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      scrollToTarget(nextStep);
     } else {
       completeTour();
     }
@@ -60,7 +82,9 @@ export default function AppTour() {
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      scrollToTarget(prevStep);
     }
   };
 
@@ -73,9 +97,14 @@ export default function AppTour() {
 
   const step = TOUR_STEPS[currentStep];
 
+  // Get target element position for highlighting
+  const target = typeof window !== "undefined" ? document.getElementById(step.targetId) : null;
+  const targetRect = target?.getBoundingClientRect() ?? null;
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      ref={dialogRef}
+      className="fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
       aria-label="App tour"
@@ -83,8 +112,31 @@ export default function AppTour() {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-neutral-900/60" />
 
-      {/* Tour card */}
-      <article className="relative z-10 mx-4 w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-lg">
+      {/* Highlight outline around target element */}
+      {targetRect && (
+        <div
+          className="absolute z-10 rounded-xl border-2 border-primary-400 shadow-lg shadow-primary-400/20 pointer-events-none"
+          style={{
+            top: targetRect.top - 4,
+            left: targetRect.left - 4,
+            width: targetRect.width + 8,
+            height: targetRect.height + 8,
+          }}
+        />
+      )}
+
+      {/* Tour card - positioned below target or centered as fallback */}
+      <article
+        className="absolute z-20 mx-4 w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-lg"
+        style={
+          targetRect
+            ? {
+                top: Math.min(targetRect.bottom + 16, window.innerHeight - 280),
+                left: Math.max(16, Math.min(targetRect.left, window.innerWidth - 432)),
+              }
+            : { top: "50%", left: "50%", transform: "translate(-50%, -50%)" }
+        }
+      >
         <header className="mb-4">
           <p className="text-xs font-medium text-primary-500">
             Step {currentStep + 1} of {TOUR_STEPS.length}

@@ -52,6 +52,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const login = (email: string, _password?: string) => {
+    // Check if a user with this email already exists in localStorage
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const existingUser = JSON.parse(stored) as User;
+        if (existingUser.email === email) {
+          setUser(existingUser);
+          return;
+        }
+      } catch {
+        // Ignore parse errors and create fresh user
+      }
+    }
     const newUser: User = {
       email,
       name: email.split("@")[0],

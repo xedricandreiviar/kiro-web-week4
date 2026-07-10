@@ -7,10 +7,10 @@ import { useAuth } from "../context/AuthContext";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "📊" },
-  { label: "Expenses", href: "/dashboard", icon: "💸" },
-  { label: "Budget", href: "/dashboard", icon: "📋" },
-  { label: "Goals", href: "/dashboard", icon: "🎯" },
-  { label: "Settings", href: "/dashboard", icon: "⚙️" },
+  { label: "Expenses", href: "/dashboard#tour-expense-tracker", icon: "💸" },
+  { label: "Budget", href: "/dashboard#tour-budget-overview", icon: "📋" },
+  { label: "Goals", href: "/dashboard#tour-savings-goal", icon: "🎯" },
+  { label: "Settings", href: "/dashboard", icon: "⚙️", comingSoon: true },
 ];
 
 export default function DashboardLayout({
@@ -28,7 +28,14 @@ export default function DashboardLayout({
   }, [isLoggedIn, router]);
 
   if (!isLoggedIn) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
+          <p className="text-sm text-neutral-500">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -43,13 +50,23 @@ export default function DashboardLayout({
             <ul className="space-y-1">
               {NAV_ITEMS.map((item) => (
                 <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
-                  >
-                    <span aria-hidden="true">{item.icon}</span>
-                    {item.label}
-                  </Link>
+                  {"comingSoon" in item && item.comingSoon ? (
+                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-400 cursor-not-allowed">
+                      <span aria-hidden="true">{item.icon}</span>
+                      {item.label}
+                      <span className="ml-auto rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-400">
+                        Soon
+                      </span>
+                    </span>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
+                    >
+                      <span aria-hidden="true">{item.icon}</span>
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -58,14 +75,24 @@ export default function DashboardLayout({
         {/* Mobile navigation */}
         <nav className="flex gap-1 overflow-x-auto px-4 pb-3 lg:hidden" aria-label="Dashboard navigation">
           {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
-            >
-              <span aria-hidden="true">{item.icon}</span>
-              {item.label}
-            </Link>
+            "comingSoon" in item && item.comingSoon ? (
+              <span
+                key={item.label}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-neutral-400 cursor-not-allowed"
+              >
+                <span aria-hidden="true">{item.icon}</span>
+                {item.label}
+              </span>
+            ) : (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
+              >
+                <span aria-hidden="true">{item.icon}</span>
+                {item.label}
+              </Link>
+            )
           ))}
         </nav>
       </aside>

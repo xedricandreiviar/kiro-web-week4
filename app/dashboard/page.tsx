@@ -111,10 +111,12 @@ export default function DashboardPage() {
 
   const handleAddExpense = (e: FormEvent) => {
     e.preventDefault();
+    const amount = parseFloat(newAmount);
+    if (isNaN(amount) || amount <= 0) return;
     const expense: Expense = {
       id: `exp-${Date.now()}`,
       description: newDescription,
-      amount: parseFloat(newAmount),
+      amount,
       category: newCategory || "Other",
       date: new Date().toISOString().split("T")[0],
     };
@@ -293,6 +295,7 @@ export default function DashboardPage() {
                     id="exp-amount"
                     type="number"
                     step="0.01"
+                    min="0.01"
                     required
                     value={newAmount}
                     onChange={(e) => setNewAmount(e.target.value)}
