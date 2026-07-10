@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-005",
+  "type": "feat",
+  "description": "Build Reports & Analytics page (monthly/yearly summaries with trends and charts), Financial Calendar page (upcoming bills, pay days, goals deadlines), Insights page (personalized tips based on spending patterns), and Settings page (profile, onboarding answers, preferences, data export).",
+  "status": "in_progress",
+  "steps": [
+    "Create app/dashboard/reports/page.tsx - Reports & analytics page with: (1) Period selector (this month, last month, last 3 months, last 6 months, this year), (2) Summary cards: total income, total expenses, net savings, savings rate %, (3) Expense breakdown by category (horizontal bar chart using div-based bars with percentages), (4) Income vs Expenses comparison (side-by-side bars for selected period), (5) Top spending categories ranked list, (6) Monthly trend - show month-by-month totals for the selected period in a simple table or bar format, (7) Average daily spending calculation, (8) Biggest single expense in period, (9) Category that grew most vs last period.",
+    "Create app/dashboard/calendar/page.tsx - Financial calendar page with: (1) Month view grid calendar (7 columns x 5-6 rows), (2) Each day cell shows: bill due indicators (colored dots), income expected (pay days), savings goal deadlines, (3) Navigation to previous/next month, (4) Day detail panel - clicking a day shows all financial events for that day, (5) Legend showing what each color/indicator means, (6) 'Today' highlight, (7) Pull data from bills, income (recurring), and savings goals deadlines.",
+    "Create app/dashboard/insights/page.tsx - Personalized insights page with: (1) Generate insights based on user's actual spending data and onboarding goals, (2) Insight cards with icon, title, description, and actionable tip, (3) Categories of insights: spending alerts (categories where spending increased significantly), savings tips (based on their goal and actual progress), budget recommendations (suggest budgets for categories without them), bill reminders (upcoming bills), debt tips (if they have debt, suggest strategies), goal progress (are they on track?), (4) Each insight should reference actual numbers from their data, (5) Refresh/regenerate insights button.",
+    "Create app/dashboard/settings/page.tsx - Settings page with: (1) Profile section: edit name, email display (read-only since simulated), (2) Onboarding preferences: ability to change income range, spending categories, financial goal, savings target (same options as onboarding page), (3) Data management: export all data as JSON download, clear all data (with confirmation), (4) App preferences: currency display format, (5) About section with app version info."
+  ],
+  "acceptance_criteria": [
+    "Reports page shows financial summaries for selectable time periods",
+    "Reports page displays expense breakdown by category with visual bars",
+    "Calendar page shows a month grid with financial events on correct dates",
+    "Calendar page allows navigating between months",
+    "Insights page generates personalized tips based on actual user data",
+    "Insights reference real numbers from the user's transactions and budgets",
+    "Settings page allows updating profile and onboarding preferences",
+    "Settings page allows exporting data as JSON",
+    "Settings page allows clearing all data with confirmation",
+    "All pages use responsive Tailwind CSS and semantic HTML",
+    "npm run build completes without errors"
+  ],
+  "verification": ["npm run build", "npm run lint"],
+  "blocked_reason": null,
+  "findings": ""
+}
