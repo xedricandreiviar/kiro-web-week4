@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../context/AuthContext";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: "📊" },
-  { label: "Expenses", href: "/dashboard#tour-expense-tracker", icon: "💸" },
-  { label: "Budget", href: "/dashboard#tour-budget-overview", icon: "📋" },
-  { label: "Goals", href: "/dashboard#tour-savings-goal", icon: "🎯" },
-  { label: "Settings", href: "/dashboard", icon: "⚙️", comingSoon: true },
+  { label: "Transactions", href: "/dashboard/transactions", icon: "💸" },
+  { label: "Budgets", href: "/dashboard/budgets", icon: "📋" },
+  { label: "Income", href: "/dashboard/income", icon: "💰" },
+  { label: "Savings Goals", href: "/dashboard/savings", icon: "🎯" },
+  { label: "Bills & Recurring", href: "/dashboard/bills", icon: "🔄" },
+  { label: "Reports", href: "/dashboard/reports", icon: "📈" },
+  { label: "Net Worth", href: "/dashboard/net-worth", icon: "🏦" },
+  { label: "Debts", href: "/dashboard/debts", icon: "💳" },
+  { label: "Calendar", href: "/dashboard/calendar", icon: "📅" },
+  { label: "Insights", href: "/dashboard/insights", icon: "💡" },
+  { label: "Settings", href: "/dashboard/settings", icon: "⚙️" },
 ];
 
 export default function DashboardLayout({
@@ -20,6 +27,7 @@ export default function DashboardLayout({
 }) {
   const { user, isLoggedIn, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -38,10 +46,15 @@ export default function DashboardLayout({
     );
   }
 
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname.startsWith(href);
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50 lg:flex-row">
       {/* Sidebar */}
-      <aside className="w-full border-b border-neutral-200 bg-white lg:w-64 lg:border-b-0 lg:border-r">
+      <aside className="w-full border-b border-neutral-200 bg-white lg:w-64 lg:border-b-0 lg:border-r lg:min-h-screen">
         <div className="flex items-center justify-between px-4 py-4 lg:flex-col lg:items-start lg:gap-6 lg:px-6 lg:py-6">
           <Link href="/" className="text-xl font-bold text-primary-600">
             BudgetWise
@@ -50,23 +63,17 @@ export default function DashboardLayout({
             <ul className="space-y-1">
               {NAV_ITEMS.map((item) => (
                 <li key={item.label}>
-                  {"comingSoon" in item && item.comingSoon ? (
-                    <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-400 cursor-not-allowed">
-                      <span aria-hidden="true">{item.icon}</span>
-                      {item.label}
-                      <span className="ml-auto rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-400">
-                        Soon
-                      </span>
-                    </span>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-primary-50 hover:text-primary-700"
-                    >
-                      <span aria-hidden="true">{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  )}
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                      isActive(item.href)
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-neutral-700 hover:bg-primary-50 hover:text-primary-700"
+                    }`}
+                  >
+                    <span aria-hidden="true">{item.icon}</span>
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -75,24 +82,18 @@ export default function DashboardLayout({
         {/* Mobile navigation */}
         <nav className="flex gap-1 overflow-x-auto px-4 pb-3 lg:hidden" aria-label="Dashboard navigation">
           {NAV_ITEMS.map((item) => (
-            "comingSoon" in item && item.comingSoon ? (
-              <span
-                key={item.label}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-neutral-400 cursor-not-allowed"
-              >
-                <span aria-hidden="true">{item.icon}</span>
-                {item.label}
-              </span>
-            ) : (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
-              >
-                <span aria-hidden="true">{item.icon}</span>
-                {item.label}
-              </Link>
-            )
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                isActive(item.href)
+                  ? "bg-primary-50 text-primary-700"
+                  : "text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
+              }`}
+            >
+              <span aria-hidden="true">{item.icon}</span>
+              {item.label}
+            </Link>
           ))}
         </nav>
       </aside>
