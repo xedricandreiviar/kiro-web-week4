@@ -101,6 +101,7 @@ export default function DebtsPage() {
   const [form, setForm] = useState<DebtForm>(emptyForm);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [error, setError] = useState("");
 
   // Summary calculations
   const totalDebt = debts.reduce((sum, d) => sum + d.remainingAmount, 0);
@@ -136,7 +137,7 @@ export default function DebtsPage() {
     if (isNaN(dueDate) || dueDate < 1 || dueDate > 31) return;
 
     if (editingId) {
-      debtStorage.update(editingId, {
+      const result = debtStorage.update(editingId, {
         name: form.name.trim(),
         totalAmount,
         remainingAmount,
@@ -144,6 +145,10 @@ export default function DebtsPage() {
         minimumPayment,
         dueDate,
       });
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
       const debt: Debt = {
         id: generateId(),
@@ -154,9 +159,14 @@ export default function DebtsPage() {
         minimumPayment,
         dueDate,
       };
-      debtStorage.create(debt);
+      const result = debtStorage.create(debt);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setDebts(debtStorage.getAll());
     resetForm();
   };
@@ -169,8 +179,13 @@ export default function DebtsPage() {
     if (!debt) return;
 
     const newRemaining = Math.max(0, debt.remainingAmount - amount);
-    debtStorage.update(debtId, { remainingAmount: newRemaining });
+    const result = debtStorage.update(debtId, { remainingAmount: newRemaining });
+    if (!result.success) {
+      setError("Failed to save. Storage may be full.");
+      return;
+    }
 
+    setError("");
     setDebts(debtStorage.getAll());
     setPaymentId(null);
     setPaymentAmount("");
@@ -255,6 +270,13 @@ export default function DebtsPage() {
             </p>
           </article>
         </section>
+      )}
+
+      {/* Error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
       )}
 
       {/* Add/Edit Debt Form */}

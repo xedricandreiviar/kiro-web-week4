@@ -92,6 +92,8 @@ export default function NetWorthPage() {
   const [editingLiabilityId, setEditingLiabilityId] = useState<string | null>(null);
   const [liabilityForm, setLiabilityForm] = useState<LiabilityForm>(emptyLiabilityForm);
 
+  const [error, setError] = useState("");
+
   // Calculations
   const totalAssets = assets.reduce((sum, a) => sum + a.value, 0);
   const totalManualLiabilities = liabilities.reduce((sum, l) => sum + l.amount, 0);
@@ -111,11 +113,15 @@ export default function NetWorthPage() {
     if (!assetForm.name.trim() || isNaN(value) || value <= 0) return;
 
     if (editingAssetId) {
-      assetStorage.update(editingAssetId, {
+      const result = assetStorage.update(editingAssetId, {
         name: assetForm.name.trim(),
         value,
         type: assetForm.type,
       });
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
       const asset: Asset = {
         id: generateId(),
@@ -123,9 +129,14 @@ export default function NetWorthPage() {
         value,
         type: assetForm.type,
       };
-      assetStorage.create(asset);
+      const result = assetStorage.create(asset);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setAssets(assetStorage.getAll());
     resetAssetForm();
   };
@@ -160,11 +171,15 @@ export default function NetWorthPage() {
     if (!liabilityForm.name.trim() || isNaN(amount) || amount <= 0) return;
 
     if (editingLiabilityId) {
-      liabilityStorage.update(editingLiabilityId, {
+      const result = liabilityStorage.update(editingLiabilityId, {
         name: liabilityForm.name.trim(),
         amount,
         type: liabilityForm.type,
       });
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
       const liability: Liability = {
         id: generateId(),
@@ -172,9 +187,14 @@ export default function NetWorthPage() {
         amount,
         type: liabilityForm.type,
       };
-      liabilityStorage.create(liability);
+      const result = liabilityStorage.create(liability);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setLiabilities(liabilityStorage.getAll());
     resetLiabilityForm();
   };
@@ -221,6 +241,13 @@ export default function NetWorthPage() {
           Track your total assets and liabilities to understand your financial position
         </p>
       </header>
+
+      {/* Error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Net Worth Headline */}
       <section

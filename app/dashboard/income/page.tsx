@@ -51,6 +51,7 @@ export default function IncomePage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<IncomeForm>(emptyForm);
+  const [error, setError] = useState("");
 
   // Current month income
   const currentMonthRange = getMonthDateRange(0);
@@ -103,11 +104,20 @@ export default function IncomePage() {
     };
 
     if (editingId) {
-      transactionStorage.update(editingId, transactionData);
+      const result = transactionStorage.update(editingId, transactionData);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
-      transactionStorage.create(transactionData);
+      const result = transactionStorage.create(transactionData);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setIncomeList(loadIncomeTransactions());
     resetForm();
   };
@@ -160,6 +170,13 @@ export default function IncomePage() {
           + Add Income
         </button>
       </header>
+
+      {/* Error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Summary cards */}
       <section className="grid gap-4 md:grid-cols-3" aria-label="Income summary">

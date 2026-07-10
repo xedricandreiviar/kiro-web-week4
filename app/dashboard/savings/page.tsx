@@ -64,6 +64,7 @@ export default function SavingsGoalsPage() {
   const [form, setForm] = useState<GoalForm>(emptyForm);
   const [addFundsId, setAddFundsId] = useState<string | null>(null);
   const [fundsAmount, setFundsAmount] = useState("");
+  const [error, setError] = useState("");
 
   // Separate active and completed goals
   const activeGoals = goals.filter((g) => g.currentAmount < g.targetAmount);
@@ -81,13 +82,17 @@ export default function SavingsGoalsPage() {
     if (isNaN(targetAmount) || targetAmount <= 0 || !form.name.trim()) return;
 
     if (editingId) {
-      savingsGoalStorage.update(editingId, {
+      const result = savingsGoalStorage.update(editingId, {
         name: form.name.trim(),
         targetAmount,
         currentAmount,
         deadline: form.deadline,
         color: form.color,
       });
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
       const goal: SavingsGoal = {
         id: generateId(),
@@ -97,9 +102,14 @@ export default function SavingsGoalsPage() {
         deadline: form.deadline,
         color: form.color,
       };
-      savingsGoalStorage.create(goal);
+      const result = savingsGoalStorage.create(goal);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setGoals(savingsGoalStorage.getAll());
     resetForm();
   };
@@ -111,10 +121,15 @@ export default function SavingsGoalsPage() {
     const goal = goals.find((g) => g.id === goalId);
     if (!goal) return;
 
-    savingsGoalStorage.update(goalId, {
+    const result = savingsGoalStorage.update(goalId, {
       currentAmount: goal.currentAmount + amount,
     });
+    if (!result.success) {
+      setError("Failed to save. Storage may be full.");
+      return;
+    }
 
+    setError("");
     setGoals(savingsGoalStorage.getAll());
     setAddFundsId(null);
     setFundsAmount("");
@@ -168,6 +183,13 @@ export default function SavingsGoalsPage() {
           + Create Goal
         </button>
       </header>
+
+      {/* Error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Overall summary */}
       {goals.length > 0 && (

@@ -109,6 +109,7 @@ export default function BillsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BillForm>(emptyForm);
+  const [error, setError] = useState("");
 
   // Summary calculations
   const totalDue = bills.reduce((sum, b) => sum + b.amount, 0);
@@ -141,7 +142,7 @@ export default function BillsPage() {
     if (isNaN(dueDate) || dueDate < 1 || dueDate > 31) return;
 
     if (editingId) {
-      billStorage.update(editingId, {
+      const result = billStorage.update(editingId, {
         name: form.name.trim(),
         amount,
         dueDate,
@@ -149,6 +150,10 @@ export default function BillsPage() {
         category: form.category.trim(),
         autoPay: form.autoPay,
       });
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
       const bill: Bill = {
         id: generateId(),
@@ -160,23 +165,38 @@ export default function BillsPage() {
         isPaid: false,
         autoPay: form.autoPay,
       };
-      billStorage.create(bill);
+      const result = billStorage.create(bill);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setBills(billStorage.getAll());
     resetForm();
   };
 
   const handleMarkPaid = (id: string) => {
-    billStorage.update(id, {
+    const result = billStorage.update(id, {
       isPaid: true,
       lastPaidDate: new Date().toISOString().split("T")[0],
     });
+    if (!result.success) {
+      setError("Failed to save. Storage may be full.");
+      return;
+    }
+    setError("");
     setBills(billStorage.getAll());
   };
 
   const handleMarkUnpaid = (id: string) => {
-    billStorage.update(id, { isPaid: false });
+    const result = billStorage.update(id, { isPaid: false });
+    if (!result.success) {
+      setError("Failed to save. Storage may be full.");
+      return;
+    }
+    setError("");
     setBills(billStorage.getAll());
   };
 
@@ -234,6 +254,13 @@ export default function BillsPage() {
           + Add Bill
         </button>
       </header>
+
+      {/* Error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Monthly summary cards */}
       {bills.length > 0 && (

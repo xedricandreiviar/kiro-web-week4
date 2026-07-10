@@ -61,6 +61,7 @@ export default function BudgetsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BudgetForm>(emptyForm);
+  const [error, setError] = useState("");
 
   // Calculate spent amounts for all budgets
   const budgetData = budgets.map((budget) => {
@@ -80,11 +81,15 @@ export default function BudgetsPage() {
     if (isNaN(limit) || limit <= 0) return;
 
     if (editingId) {
-      budgetStorage.update(editingId, {
+      const result = budgetStorage.update(editingId, {
         category: form.category,
         limit,
         period: form.period,
       });
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     } else {
       const budget: Budget = {
         id: generateId(),
@@ -92,9 +97,14 @@ export default function BudgetsPage() {
         limit,
         period: form.period,
       };
-      budgetStorage.create(budget);
+      const result = budgetStorage.create(budget);
+      if (!result.success) {
+        setError("Failed to save. Storage may be full.");
+        return;
+      }
     }
 
+    setError("");
     setBudgets(budgetStorage.getAll());
     resetForm();
   };
@@ -145,6 +155,13 @@ export default function BudgetsPage() {
           + Create Budget
         </button>
       </header>
+
+      {/* Error banner */}
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Overview summary */}
       {budgets.length > 0 && (

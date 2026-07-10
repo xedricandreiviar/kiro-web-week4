@@ -26,68 +26,6 @@ function loadData() {
   };
 }
 
-function getEventsForDay(
-  day: number,
-  month: number,
-  year: number,
-  bills: Bill[],
-  recurringIncome: Transaction[],
-  goals: SavingsGoal[]
-): CalendarEvent[] {
-  const events: CalendarEvent[] = [];
-
-  // Bills due on this day of month
-  bills.forEach((bill) => {
-    if (bill.dueDate === day) {
-      events.push({ type: "bill", name: bill.name, amount: bill.amount });
-    }
-  });
-
-  // Recurring income on this day
-  // Note: For non-monthly frequencies (weekly, biweekly), pinning to day-of-month
-  // is an approximation. A proper implementation would compute exact recurrence dates.
-  // Only show monthly recurring income on the matching day-of-month.
-  recurringIncome.forEach((t) => {
-    const tDate = new Date(t.date);
-    const frequency = t.recurringFrequency;
-
-    if (frequency === "monthly" || frequency === "yearly") {
-      // Monthly/yearly: show on the same day-of-month as the original transaction
-      if (tDate.getDate() === day) {
-        events.push({ type: "income", name: t.description, amount: t.amount });
-      }
-    } else if (frequency === "weekly") {
-      // Weekly: show on matching day-of-week
-      const cellDate = new Date(year, month, day);
-      if (cellDate.getDay() === tDate.getDay()) {
-        events.push({ type: "income", name: t.description, amount: t.amount });
-      }
-    } else if (frequency === "biweekly") {
-      // Biweekly: show every 14 days from original date
-      const cellDate = new Date(year, month, day);
-      const diffDays = Math.round((cellDate.getTime() - tDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (diffDays >= 0 && diffDays % 14 === 0) {
-        events.push({ type: "income", name: t.description, amount: t.amount });
-      }
-    } else {
-      // Default/daily: show on the matching day-of-month
-      if (tDate.getDate() === day) {
-        events.push({ type: "income", name: t.description, amount: t.amount });
-      }
-    }
-  });
-
-  // Savings goal deadlines
-  goals.forEach((goal) => {
-    const deadline = new Date(goal.deadline);
-    if (deadline.getFullYear() === year && deadline.getMonth() === month && deadline.getDate() === day) {
-      events.push({ type: "goal", name: goal.name, amount: goal.targetAmount });
-    }
-  });
-
-  return events;
-}
-
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function CalendarPage() {
@@ -122,14 +60,72 @@ export default function CalendarPage() {
     return days;
   }, [currentMonth, currentYear]);
 
+  // Pre-compute events for all days of the month in a single pass
+  const eventsMap = useMemo(() => {
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const map = new Map<number, CalendarEvent[]>();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const events: CalendarEvent[] = [];
+
+      // Bills due on this day of month
+      data.bills.forEach((bill) => {
+        if (bill.dueDate === day) {
+          events.push({ type: "bill", name: bill.name, amount: bill.amount });
+        }
+      });
+
+      // Recurring income on this day
+      recurringIncome.forEach((t) => {
+        const tDate = new Date(t.date);
+        const frequency = t.recurringFrequency;
+
+        if (frequency === "monthly" || frequency === "yearly") {
+          if (tDate.getDate() === day) {
+            events.push({ type: "income", name: t.description, amount: t.amount });
+          }
+        } else if (frequency === "weekly") {
+          const cellDate = new Date(currentYear, currentMonth, day);
+          if (cellDate.getDay() === tDate.getDay()) {
+            events.push({ type: "income", name: t.description, amount: t.amount });
+          }
+        } else if (frequency === "biweekly") {
+          const cellDate = new Date(currentYear, currentMonth, day);
+          const diffDays = Math.round((cellDate.getTime() - tDate.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays >= 0 && diffDays % 14 === 0) {
+            events.push({ type: "income", name: t.description, amount: t.amount });
+          }
+        } else {
+          if (tDate.getDate() === day) {
+            events.push({ type: "income", name: t.description, amount: t.amount });
+          }
+        }
+      });
+
+      // Savings goal deadlines
+      data.goals.forEach((goal) => {
+        const deadline = new Date(goal.deadline);
+        if (deadline.getFullYear() === currentYear && deadline.getMonth() === currentMonth && deadline.getDate() === day) {
+          events.push({ type: "goal", name: goal.name, amount: goal.targetAmount });
+        }
+      });
+
+      if (events.length > 0) {
+        map.set(day, events);
+      }
+    }
+
+    return map;
+  }, [currentMonth, currentYear, data.bills, recurringIncome, data.goals]);
+
   const today = new Date();
   const isToday = (day: number) =>
     day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
 
   const selectedDayEvents = useMemo(() => {
     if (selectedDay === null) return [];
-    return getEventsForDay(selectedDay, currentMonth, currentYear, data.bills, recurringIncome, data.goals);
-  }, [selectedDay, currentMonth, currentYear, data.bills, recurringIncome, data.goals]);
+    return eventsMap.get(selectedDay) || [];
+  }, [selectedDay, eventsMap]);
 
   const goToPrevMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
@@ -189,7 +185,7 @@ export default function CalendarPage() {
               return <div key={`empty-${idx}`} className="h-16 sm:h-20" />;
             }
 
-            const events = getEventsForDay(day, currentMonth, currentYear, data.bills, recurringIncome, data.goals);
+            const events = eventsMap.get(day) || [];
             const hasBill = events.some((e) => e.type === "bill");
             const hasIncome = events.some((e) => e.type === "income");
             const hasGoal = events.some((e) => e.type === "goal");

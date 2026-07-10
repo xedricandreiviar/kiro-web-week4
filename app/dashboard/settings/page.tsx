@@ -10,6 +10,8 @@ import {
   debtStorage,
   assetStorage,
   liabilityStorage,
+  safeSetItemRaw,
+  STORAGE_KEYS,
 } from "../../lib/storage";
 
 const INCOME_RANGES = [
@@ -130,49 +132,67 @@ export default function SettingsPage() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
+      const json = event.target?.result as string;
+
+      // Step 1: Parse JSON
+      let data: Record<string, unknown>;
       try {
-        const json = event.target?.result as string;
-        const data = JSON.parse(json);
-
-        // Validate the structure has expected keys
-        const validKeys = ["transactions", "budgets", "savingsGoals", "bills", "debts", "assets", "liabilities"];
-        const hasValidData = validKeys.some((key) => Array.isArray(data[key]));
-
-        if (!hasValidData) {
-          setImportStatus({ type: "error", message: "Invalid file format. Expected a BudgetWise export JSON." });
-          setTimeout(() => setImportStatus(null), 5000);
-          return;
-        }
-
-        // Import each entity type if present in the file
-        if (Array.isArray(data.transactions)) {
-          localStorage.setItem("budgetwise_transactions", JSON.stringify(data.transactions));
-        }
-        if (Array.isArray(data.budgets)) {
-          localStorage.setItem("budgetwise_budgets", JSON.stringify(data.budgets));
-        }
-        if (Array.isArray(data.savingsGoals)) {
-          localStorage.setItem("budgetwise_savings_goals", JSON.stringify(data.savingsGoals));
-        }
-        if (Array.isArray(data.bills)) {
-          localStorage.setItem("budgetwise_bills", JSON.stringify(data.bills));
-        }
-        if (Array.isArray(data.debts)) {
-          localStorage.setItem("budgetwise_debts", JSON.stringify(data.debts));
-        }
-        if (Array.isArray(data.assets)) {
-          localStorage.setItem("budgetwise_assets", JSON.stringify(data.assets));
-        }
-        if (Array.isArray(data.liabilities)) {
-          localStorage.setItem("budgetwise_liabilities", JSON.stringify(data.liabilities));
-        }
-
-        setImportStatus({ type: "success", message: "Data imported successfully! Refresh the page to see updated data." });
-        setTimeout(() => setImportStatus(null), 5000);
+        data = JSON.parse(json);
       } catch {
         setImportStatus({ type: "error", message: "Failed to parse the file. Make sure it is a valid JSON export." });
         setTimeout(() => setImportStatus(null), 5000);
+        return;
       }
+
+      // Step 2: Validate structure has expected keys
+      const validKeys = ["transactions", "budgets", "savingsGoals", "bills", "debts", "assets", "liabilities"];
+      const hasValidData = validKeys.some((key) => Array.isArray(data[key]));
+
+      if (!hasValidData) {
+        setImportStatus({ type: "error", message: "Invalid file format. Expected a BudgetWise export JSON with at least one data array." });
+        setTimeout(() => setImportStatus(null), 5000);
+        return;
+      }
+
+      // Step 3: Pre-validate approximate total size before writing
+      const entityMap: { key: string; storageKey: string; data: unknown[] }[] = [];
+      if (Array.isArray(data.transactions)) entityMap.push({ key: "transactions", storageKey: STORAGE_KEYS.transactions, data: data.transactions });
+      if (Array.isArray(data.budgets)) entityMap.push({ key: "budgets", storageKey: STORAGE_KEYS.budgets, data: data.budgets });
+      if (Array.isArray(data.savingsGoals)) entityMap.push({ key: "savingsGoals", storageKey: STORAGE_KEYS.savingsGoals, data: data.savingsGoals });
+      if (Array.isArray(data.bills)) entityMap.push({ key: "bills", storageKey: STORAGE_KEYS.bills, data: data.bills });
+      if (Array.isArray(data.debts)) entityMap.push({ key: "debts", storageKey: STORAGE_KEYS.debts, data: data.debts });
+      if (Array.isArray(data.assets)) entityMap.push({ key: "assets", storageKey: STORAGE_KEYS.assets, data: data.assets });
+      if (Array.isArray(data.liabilities)) entityMap.push({ key: "liabilities", storageKey: STORAGE_KEYS.liabilities, data: data.liabilities });
+
+      // Estimate total bytes to write (rough check)
+      const totalBytes = entityMap.reduce((sum, entry) => sum + JSON.stringify(entry.data).length, 0);
+      // localStorage typically has a 5MB limit; warn if import data alone exceeds 4MB
+      if (totalBytes > 4 * 1024 * 1024) {
+        setImportStatus({ type: "error", message: "Import data is too large. The file exceeds the storage capacity limit." });
+        setTimeout(() => setImportStatus(null), 5000);
+        return;
+      }
+
+      // Step 4: Write each entity type using safeSetItemRaw
+      const failedKeys: string[] = [];
+      for (const entry of entityMap) {
+        const success = safeSetItemRaw(entry.storageKey, JSON.stringify(entry.data));
+        if (!success) {
+          failedKeys.push(entry.key);
+        }
+      }
+
+      if (failedKeys.length > 0) {
+        setImportStatus({
+          type: "error",
+          message: `Storage quota exceeded. Failed to write: ${failedKeys.join(", ")}. Some data may have been partially imported.`,
+        });
+        setTimeout(() => setImportStatus(null), 7000);
+        return;
+      }
+
+      setImportStatus({ type: "success", message: "Data imported successfully! Refresh the page to see updated data." });
+      setTimeout(() => setImportStatus(null), 5000);
     };
     reader.readAsText(file);
 

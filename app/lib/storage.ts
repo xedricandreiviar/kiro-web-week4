@@ -72,7 +72,7 @@ export interface Liability {
 // Storage Keys
 // ============================================================================
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   transactions: "budgetwise_transactions",
   budgets: "budgetwise_budgets",
   savingsGoals: "budgetwise_savings_goals",
@@ -94,6 +94,21 @@ function safeGetItem<T>(key: string): T[] {
     return JSON.parse(data) as T[];
   } catch {
     return [];
+  }
+}
+
+/**
+ * Attempts to write a raw string to localStorage. Returns true on success, false on failure
+ * (e.g., quota exceeded). Exported for use by the import function.
+ */
+export function safeSetItemRaw(key: string, value: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    console.warn(`[BudgetWise] Failed to write to localStorage key "${key}". Storage may be full.`);
+    return false;
   }
 }
 
