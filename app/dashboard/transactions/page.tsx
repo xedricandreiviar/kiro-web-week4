@@ -287,7 +287,7 @@ export default function TransactionsPage() {
                   htmlFor="txn-amount"
                   className="block text-sm font-medium text-neutral-700"
                 >
-                  Amount ($)
+                  Amount (PHP)
                 </label>
                 <input
                   id="txn-amount"

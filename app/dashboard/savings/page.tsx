@@ -274,7 +274,7 @@ export default function SavingsGoalsPage() {
                   htmlFor="goal-target"
                   className="block text-sm font-medium text-neutral-700"
                 >
-                  Target Amount ($)
+                  Target Amount (PHP)
                 </label>
                 <input
                   id="goal-target"
@@ -297,7 +297,7 @@ export default function SavingsGoalsPage() {
                   htmlFor="goal-current"
                   className="block text-sm font-medium text-neutral-700"
                 >
-                  Current Amount ($)
+                  Current Amount (PHP)
                 </label>
                 <input
                   id="goal-current"

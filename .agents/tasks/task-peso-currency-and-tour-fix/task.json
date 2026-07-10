@@ -1,0 +1,7 @@
+{
+  "task_id": "task-peso-currency-and-tour-fix",
+  "task_description": "Replace all Dollar/USD currency references with Philippine Peso (PHP) throughout the app, and fix the AppTour component so tour steps correctly describe and point to the actual UI elements on the dashboard.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}

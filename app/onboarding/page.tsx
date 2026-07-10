@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useAuth, OnboardingData } from "../context/AuthContext";
 
 const INCOME_RANGES = [
-  "Under $2,000",
-  "$2,000 - $4,000",
-  "$4,000 - $6,000",
-  "$6,000 - $8,000",
-  "$8,000 - $10,000",
-  "Over $10,000",
+  "Under \u20B150,000",
+  "\u20B150,000 - \u20B1100,000",
+  "\u20B1100,000 - \u20B1150,000",
+  "\u20B1150,000 - \u20B1200,000",
+  "\u20B1200,000 - \u20B1300,000",
+  "Over \u20B1300,000",
 ];
 
 const SPENDING_CATEGORIES = [
@@ -32,11 +32,11 @@ const FINANCIAL_GOALS = [
 ];
 
 const SAVINGS_TARGETS = [
-  "$100 - $300",
-  "$300 - $500",
-  "$500 - $1,000",
-  "$1,000 - $2,000",
-  "Over $2,000",
+  "\u20B15,000 - \u20B115,000",
+  "\u20B115,000 - \u20B125,000",
+  "\u20B125,000 - \u20B150,000",
+  "\u20B150,000 - \u20B1100,000",
+  "Over \u20B1100,000",
 ];
 
 const TOTAL_STEPS = 4;

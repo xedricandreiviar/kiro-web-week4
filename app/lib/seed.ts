@@ -86,14 +86,14 @@ function generateTransactions(
 
   // Determine income amount based on income range
   const incomeMap: Record<string, number> = {
-    "Under $2,000": 1800,
-    "$2,000 - $4,000": 3500,
-    "$4,000 - $6,000": 5000,
-    "$6,000 - $8,000": 7000,
-    "$8,000 - $10,000": 9000,
-    "Over $10,000": 12000,
+    "Under \u20B150,000": 40000,
+    "\u20B150,000 - \u20B1100,000": 75000,
+    "\u20B1100,000 - \u20B1150,000": 125000,
+    "\u20B1150,000 - \u20B1200,000": 175000,
+    "\u20B1200,000 - \u20B1300,000": 250000,
+    "Over \u20B1300,000": 400000,
   };
-  const monthlyIncome = incomeMap[incomeRange] || 4000;
+  const monthlyIncome = incomeMap[incomeRange] || 75000;
 
   const transactions: Transaction[] = [];
 
@@ -163,14 +163,14 @@ function generateTransactions(
  */
 function generateBudgets(categories: string[], incomeRange: string): Budget[] {
   const incomeMap: Record<string, number> = {
-    "Under $2,000": 1800,
-    "$2,000 - $4,000": 3500,
-    "$4,000 - $6,000": 5000,
-    "$6,000 - $8,000": 7000,
-    "$8,000 - $10,000": 9000,
-    "Over $10,000": 12000,
+    "Under \u20B150,000": 40000,
+    "\u20B150,000 - \u20B1100,000": 75000,
+    "\u20B1100,000 - \u20B1150,000": 125000,
+    "\u20B1150,000 - \u20B1200,000": 175000,
+    "\u20B1200,000 - \u20B1300,000": 250000,
+    "Over \u20B1300,000": 400000,
   };
-  const income = incomeMap[incomeRange] || 4000;
+  const income = incomeMap[incomeRange] || 75000;
 
   const defaultBudgets: { category: string; percentage: number }[] = [
     { category: "Food & Dining", percentage: 0.15 },
@@ -212,13 +212,13 @@ function generateBudgets(categories: string[], incomeRange: string): Budget[] {
  */
 function generateSavingsGoals(monthlySavingsTarget: string): SavingsGoal[] {
   const targetMap: Record<string, number> = {
-    "$100 - $300": 200,
-    "$300 - $500": 400,
-    "$500 - $1,000": 750,
-    "$1,000 - $2,000": 1500,
-    "Over $2,000": 2500,
+    "\u20B15,000 - \u20B115,000": 10000,
+    "\u20B115,000 - \u20B125,000": 20000,
+    "\u20B125,000 - \u20B150,000": 37500,
+    "\u20B150,000 - \u20B1100,000": 75000,
+    "Over \u20B1100,000": 125000,
   };
-  const monthlyTarget = targetMap[monthlySavingsTarget] || 400;
+  const monthlyTarget = targetMap[monthlySavingsTarget] || 20000;
 
   const sixMonthsFromNow = new Date();
   sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);

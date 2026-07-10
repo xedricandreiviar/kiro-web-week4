@@ -1,12 +1,12 @@
 // Utility functions for formatting, calculations, and helpers
 
 /**
- * Format a number as USD currency: $X,XXX.XX
+ * Format a number as Philippine Peso currency: PHP X,XXX.XX
  */
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-PH", {
     style: "currency",
-    currency: "USD",
+    currency: "PHP",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);

@@ -256,7 +256,7 @@ export default function BudgetsPage() {
                   htmlFor="budget-limit"
                   className="block text-sm font-medium text-neutral-700"
                 >
-                  Monthly Limit ($)
+                  Monthly Limit (PHP)
                 </label>
                 <input
                   id="budget-limit"

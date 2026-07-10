@@ -1,0 +1,30 @@
+{
+  "project_type": "Next.js 16 app with React 19, TypeScript, Tailwind CSS 4 - personal finance/budgeting app (BudgetWise)",
+  "language": "TypeScript / TSX",
+  "build_system": "npm with Next.js",
+  "test_framework": "None configured (no test scripts or test files found)",
+  "build_command": "npm run build",
+  "test_command": "npm run lint",
+  "verification_instructions": "Run npm run build to verify no TypeScript or build errors. Run npm run lint for code quality checks.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "npm install",
+  "environment_constraints": "No test framework configured. Verification is via build and lint only.",
+  "contribution_requirements": "Use responsive Tailwind CSS utility classes and ensure Semantic HTML is used for all layout sections.",
+  "key_patterns": "All currency formatting goes through formatCurrency() in app/lib/utils.ts which uses Intl.NumberFormat. Dollar sign ranges appear as display strings in INCOME_RANGES and SAVINGS_TARGETS constants in multiple files. Form labels use 'Amount ($)' patterns. The AppTour component references targetId strings that map to id attributes on DOM elements in the dashboard page.",
+  "relevant_files": [
+    "app/lib/utils.ts",
+    "app/lib/seed.ts",
+    "app/onboarding/page.tsx",
+    "app/dashboard/settings/page.tsx",
+    "app/dashboard/page.tsx",
+    "app/dashboard/components/AppTour.tsx",
+    "app/dashboard/bills/page.tsx",
+    "app/dashboard/budgets/page.tsx",
+    "app/dashboard/income/page.tsx",
+    "app/dashboard/debts/page.tsx",
+    "app/dashboard/savings/page.tsx",
+    "app/dashboard/net-worth/page.tsx",
+    "app/dashboard/transactions/page.tsx"
+  ],
+  "directory_structure": "app/ contains the Next.js app router structure. app/lib/ has utilities (utils.ts, seed.ts, storage.ts). app/dashboard/ has the main dashboard page and sub-pages (bills, budgets, calendar, debts, income, insights, net-worth, reports, savings, settings, transactions). app/dashboard/components/ has AppTour.tsx. app/onboarding/ has the onboarding flow."
+}
