@@ -1,0 +1,25 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Build Bills & Recurring page (bill reminders, recurring bills tracker), Debts page (track debts with payoff strategies), and Net Worth page (assets vs liabilities tracking).",
+  "status": "in_progress",
+  "steps": [
+    "Create app/dashboard/bills/page.tsx - Bills & recurring payments page with: (1) Upcoming bills section showing bills due in the next 30 days sorted by due date, with overdue bills highlighted in red, (2) 'Add Bill' form with: name, amount, due date (day of month), frequency (monthly/quarterly/yearly), category, auto-pay toggle, (3) Bill cards showing: name, amount, next due date, days until due (or 'overdue' badge), paid/unpaid toggle, (4) Mark as paid action, (5) Monthly bills summary (total due this month, total paid, total remaining), (6) Edit/delete bill actions, (7) Calendar-style mini view showing which days have bills due.",
+    "Create app/dashboard/debts/page.tsx - Debt management page with: (1) Total debt overview (sum of all remaining debt amounts), (2) 'Add Debt' form with: name, total original amount, remaining amount, interest rate %, minimum payment, due date, (3) Debt cards showing: name, remaining vs total (progress bar showing how much paid off), interest rate, minimum payment, estimated payoff date based on minimum payments, (4) Payoff strategy comparison - show two strategies: 'Avalanche' (highest interest first) and 'Snowball' (smallest balance first) with estimated total interest and payoff timeline for each, (5) 'Make Payment' action to reduce debt balance, (6) Edit/delete debt actions, (7) Debt-free date projection.",
+    "Create app/dashboard/net-worth/page.tsx - Net worth tracking page with: (1) Net worth headline number (total assets - total liabilities) with month-over-month change, (2) Assets section: add/edit/delete assets (name, value, type: cash/investment/property/vehicle/other), list of assets with values, total assets, (3) Liabilities section: pulls from debts page data plus allows adding other liabilities (name, amount, type: mortgage/car_loan/student_loan/credit_card/other), total liabilities, (4) Visual breakdown showing assets bar vs liabilities bar, (5) Net worth trend (text showing last 3 months if data exists)."
+  ],
+  "acceptance_criteria": [
+    "Bills page shows upcoming bills sorted by due date",
+    "Overdue bills are visually highlighted",
+    "Users can mark bills as paid/unpaid",
+    "Debts page tracks all debts with interest rates",
+    "Debt payoff strategies (avalanche and snowball) are calculated and displayed",
+    "Net worth page shows assets minus liabilities",
+    "Users can add/edit/delete assets and liabilities",
+    "All data persists in localStorage",
+    "npm run build completes without errors"
+  ],
+  "verification": ["npm run build", "npm run lint"],
+  "blocked_reason": null,
+  "findings": ""
+}
