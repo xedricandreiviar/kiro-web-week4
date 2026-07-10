@@ -25,9 +25,14 @@ export default function EmailSignup() {
     setStatus("loading");
     setErrorMessage("");
 
-    // Simulate async form submission
+    // Simulate async form submission with occasional failure
     setTimeout(() => {
-      setStatus("success");
+      if (Math.random() < 0.15) {
+        setStatus("error");
+        setErrorMessage("Something went wrong. Please try again.");
+      } else {
+        setStatus("success");
+      }
     }, 1500);
   }
 
@@ -109,6 +114,12 @@ export default function EmailSignup() {
             <p className="text-sm text-red-600">{errorMessage}</p>
           )}
         </div>
+
+        <noscript>
+          <p className="mt-4 text-sm text-neutral-600">
+            JavaScript is required to join the waitlist.
+          </p>
+        </noscript>
       </div>
     </section>
   );

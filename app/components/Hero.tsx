@@ -1,8 +1,8 @@
 export default function Hero() {
   return (
-    <section className="w-full bg-primary-50 py-16 sm:py-20 lg:py-28">
+    <section className="w-full bg-primary-50 py-16 sm:py-20 lg:py-28" aria-labelledby="hero-heading">
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
+        <h1 id="hero-heading" className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
           Track your spending, take control of your budget
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-base text-neutral-600 sm:mt-6 sm:text-lg lg:text-xl">
