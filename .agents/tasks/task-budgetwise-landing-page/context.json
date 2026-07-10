@@ -1,0 +1,24 @@
+{
+  "project_type": "Next.js 16 App Router static site with Tailwind CSS 4",
+  "language": "TypeScript",
+  "build_system": "Next.js with bun as package manager (npm not available in sandbox). Tailwind CSS 4 via @tailwindcss/postcss plugin.",
+  "test_framework": "No test framework configured. Lint via ESLint (eslint-config-next).",
+  "build_command": "bun run build",
+  "test_command": "bun run lint",
+  "verification_instructions": "1. Run 'bun run build' - should compile and generate static pages without errors. 2. Run 'bun run lint' - should pass without errors.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "1. cd /projects/sandbox/kiro-web-week4 && bun install (already done). 2. Dependencies are installed.",
+  "environment_constraints": "Open internet mode. Node/npm not available - use 'bun' for all commands. node_modules/next/dist/docs/ contains Next.js 16 documentation - AGENTS.md warns to read these docs before writing code as this version may have breaking changes.",
+  "contribution_requirements": "Use responsive Tailwind CSS utility classes. Ensure Semantic HTML is used for all layout sections (from steering file). AGENTS.md: read docs in node_modules/next/dist/docs/ before writing code.",
+  "key_patterns": "- App Router: app/page.tsx is the homepage, app/layout.tsx is root layout. - Tailwind CSS 4: uses @import 'tailwindcss' and @theme inline block in globals.css. - Fonts: Geist and Geist_Mono from next/font/google, applied via CSS variables. - Server Components by default; use 'use client' directive for interactive components. - Static site output (no dynamic routes needed for landing page).",
+  "relevant_files": [
+    "app/page.tsx",
+    "app/layout.tsx",
+    "app/globals.css",
+    "postcss.config.mjs",
+    "tsconfig.json",
+    "package.json",
+    "public/"
+  ],
+  "directory_structure": "Root: Next.js project. app/ contains page.tsx (homepage), layout.tsx (root layout), globals.css. public/ contains SVG assets. node_modules/next/dist/docs/ contains Next.js 16 documentation."
+}
